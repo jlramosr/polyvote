@@ -1,7 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
-<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 
@@ -15,43 +14,36 @@
       }
 
       .options {
-        padding: 10px;
+        padding: 10px 10px 20px;
         margin: 10px 0px;
         border: 1px solid var(--paper-grey-200);
-        max-height: 46vh;
-        overflow-y: auto;
+        background: #FAFAFA;
       }
 
       .options__option {
-        @apply(--layout-horizontal);
-      }
-      
-      .options__option--main {
-        margin-right: 50px;
-      }
-
-      .option-fab {
-        --paper-fab-mini: {
-          color: #212121;
-        }
-      }
-
-      .options__fab--add {
-        --paper-fab-background: var(--paper-indigo-50);
-        --paper-fab-keyboard-focus-background: var(--paper-indigo-200);
-        margin-left: auto;
-        margin-top: 14px;
+        position: relative;
       }
 
       .options__option__input {
         @apply(--layout-flex);
       }
 
-      .options__option__fab--remove {
-        --paper-fab-background: var(--paper-orange-50);
-        --paper-fab-keyboard-focus-background: var(--paper-orange-100);
-        margin-left: 12px;
-        margin-top: 12px;
+      .options__option__input--width-smaller {
+        --paper-input-container-input: {
+          width: calc(100% - 26px);
+        }
+      }
+          
+      .option__option__icon {
+        --iron-icon-fill-color: var(--app-primary-color);
+        --iron-icon-width: 34px;
+        --iron-icon-height: 34px;
+        position: absolute;
+        bottom: 8px;
+        right: 0;
+        z-index: 1;
+        cursor: pointer;
+        opacity: 0.6;
       }
 
       .checks {
@@ -129,9 +121,9 @@
 
     <paper-spinner class="spinner" active="[[loadingDb]]"></paper-spinner>
 
-    <h1 class="title">[[_getTitleHeader(edit, titleHeader)]]</h1>
+    <h1 class="title" hidden$="[[smallScreen]]">[[_getTitleHeader(edit, titleHeader)]]</h1>
 
-    <div id="newContainer" class="content--box" hidden$="[[loadingDb]]">
+    <div id="newContainer" class$="content--box [[_computeClassContainer(smallScreen)]]" hidden$="[[loadingDb]]">
 
       <paper-input
         label="Title"
@@ -141,32 +133,24 @@
         error-message="Title is required"></paper-input>
       <paper-textarea label="Description" value="{{item.description}}"></paper-textarea>
       <div id="options" class="options">
-        <!--<paper-input
-          label="Option 1"
-          id="option1"
-          class="options__option--main"
-          value="{{item.option1}}"
-          required
-          error-message="An option can't be empty"></paper-input>-->
         <template is="dom-repeat" items="[[item.options]]" as="option">
           <div id="option[[index]]" class="options__option">
             <paper-input
               id="option[[index]]"
-              class="options__option__input"
+              class$="options__option__input [[_computeOptionInputClass(index)]]"
               label="Option [[_getOptionNum(index)]]"
               value="{{option.title}}"
               on-value-changed = "_optionChanged"
               name="option[[index]]"
               required="[[_isOptionRequired(index)]]"
               error-message="This option can't be empty"></paper-input>
-            <paper-fab
+            <iron-icon
               id="remove[[index]]"
-              mini
-              icon="remove"
-              class="option-fab options__option__fab--remove"
+              icon="clear"
+              class="option__option__icon"
               on-tap="_removeOptionTapped"
               index="[[index]]"
-              hidden$="[[_isOptionRequired(index)]]"></paper-fab>
+              hidden></iron-icon>
             <!-- Lazy-create the tooltip -->
             <template is="dom-if" if="[[loadComplete]]">
               <paper-tooltip
@@ -175,12 +159,6 @@
             </template>
           </div>
         </template>
-        <!--<paper-fab 
-          mini
-          icon="add"
-          id="add"
-          class="option-fab options__fab--add"
-          on-tap="_addOption"></paper-fab>-->
           
         <!-- Lazy-create the tooltip -->
         <template is="dom-if" if="[[loadComplete]]">
@@ -279,13 +257,13 @@
 
       properties: {
 
+        optionsRequired: {
+          type: Number,
+          value: 2
+        },
+
         item: {
           type: Object,
-          value: _ => {
-            return {
-              options: []
-            }
-          },
           notify: true
         },
 
@@ -299,11 +277,6 @@
           value: false
         },
 
-        optionsRequired: {
-          type: Number,
-          value: 2
-        },
-
         route: {
           type: String,
           notify: true
@@ -313,6 +286,13 @@
           type: String,
           value: 'Create new election'
         },
+
+        mobileTitle: {
+          type: String,
+          notify: true
+        },
+
+        smallScreen: Boolean,
 
         loadComplete: Boolean,
 
@@ -330,11 +310,15 @@
       },
 
       ready() {
-        // Add at least two options to election
-        this._addOption();
-        this._addOption();
+        this._setEmptyFields();
+        this.mobileTitle = 'New Election';
       },
 
+      _computeClassContainer(smallScreen) {
+        if (!this.smallScreen) {
+          return 'content--box-desktop';
+        }
+      },
 
       /**
         * Validate all inputs
@@ -343,14 +327,12 @@
         */
       _inputsValidate() {
         let allValid = true;
-        if (!this.$.title.validate()) {
+        if (!this.$.title.validate())
           allValid = false;
-        }
-        let options = Polymer.dom(this.$.options).querySelectorAll('paper-input');
+        const options = Polymer.dom(this.$.options).querySelectorAll('paper-input');
         options.forEach(option => {
-          if (!option.validate()) {
+          if (!option.validate())
             allValid = false;
-          }
         });
         return allValid;
       },
@@ -359,7 +341,14 @@
       * Leave all inputs empty and deselect all checkboxes.
       */
       _setEmptyFields() {
-        this.item = {};
+        // initialize item
+        this.item = {
+          "options": []
+        };
+        // add required options to election
+        for (let i=0; i < this.optionsRequired; i++)
+          this._addOption();
+        // clear all checkboxes
         const checks = Polymer.dom(this.$.checks).querySelectorAll('paper-checkbox');
         checks.forEach(check => {
           check.checked = false;
@@ -374,6 +363,10 @@
         */
       _createTapped() {
         if (this._inputsValidate()) {
+          if (this.item.options.length > this.optionsRequired) {
+            // last option is empty
+            this._removeOption(this.item.options.length - 1);
+          }
           this.$$('#db').createItem(this.item);
         }
       },
@@ -389,18 +382,17 @@
       },
 
       _saveTapped() {
-        if (this._inputsValidate()) {
+        if (this._inputsValidate())
           this.$$('#db').updateItem(this.item);
-        }
       },
 
       _clearTapped() {
         if (this.edit) {
-          // Return to original parameters before edit.
+          // return to original parameters before edit.
           this.item = this.$$('#db').getItem(this.id);
         }
         else {
-          // Clear all fields
+          // clear all fields
           this._setEmptyFields();
         }
       },
@@ -428,59 +420,98 @@
         * @param {Object} The object with the new value.
         */
       _optionChanged(event, newValue) {
-        // Pass twice here (due to Paper and Input Behaviour)
+        // pass twice here (due to Paper and Input Behaviour)
         if (!this.stopPropagation) {
           this.stopPropagation = true;
           return;
         }
         this.stopPropagation = false;
-        // Over here only pass one time
+        // over here only pass one time
         
         const indexOption = event.model.__data__.index;
         const numOptions = this.item.options.length; 
         if (newValue.value != "") {
-          // Value is not empty
+          // value is not empty
+          if (indexOption >= this.optionsRequired) {
+            const removeButton = Polymer.dom(this.$.options).querySelector(`#remove${indexOption}`);
+            removeButton.removeAttribute('hidden');
+          }
           if (numOptions == (indexOption + 1)) {
-            //User has focus on the last option
+            // user has focus on the last option
             this._addOption();
           }
         }
         else {
-          // Value is empty
-          if (indexOption >= this.optionsRequired) {
+          // value is empty
+          if (numOptions > this.optionsRequired) {
             this._removeOption(indexOption);
+            Polymer.dom(this.$.options).querySelector('#remove2').hidden = true;
           }
         }
-  
       },
 
+
+      /**
+        * Add an option of item list options.
+        * 
+        */
       _addOption() {
         this.push('item.options', {"title": "", "votes": 0, "custom": false});
-        console.log(this.item.options);
       },
 
+      /**
+        * Remove an option of item list options.
+        *
+        * @param {Number} The option index.
+        */
       _removeOption(index) {
         this.splice('item.options', index, 1);
-        console.log(this.item.options);
       },
 
+      /**
+        * Fired when user tap on remove option button.
+        * 
+        * Remove the option of the item list options.
+        *
+        * @param {Object} The event with the item information, among other things.
+        */
       _removeOptionTapped(event) {
         const index = event.currentTarget.index;
-        // if (index > this.optionsRequired) {
-          this._removeOption();
-        // }
+        this._removeOption(index);
       },
 
+      /**
+        * Get the index  of a list to show (no starting with zero).
+        *
+        * @param {Number} The index of the array list.
+        * @return {Number} The index to show.
+        */
       _getOptionNum(index) {
         return index+1;
       },
 
+      /**
+        * It indicates if an option is required by the user.
+        *
+        * @param {Number} The index of the item options list.
+        * @return {Boolean} True if options is required, false in other case.
+        */
       _isOptionRequired(index) {
-        if (index < this.optionsRequired) {
+        if (index < this.optionsRequired)
           return true;
-        }
         return false;
       },
+
+      /**
+        * It adds a new class to input option if it is not required.
+        *
+        * @param {Number} The index of the item options list.
+        * @return {String} The CSS class to apply. Nothing if option is required.
+        */
+      _computeOptionInputClass(index) {
+        if (!this._isOptionRequired(index))
+          return 'options__option__input--width-smaller';
+      }
       
     });
 

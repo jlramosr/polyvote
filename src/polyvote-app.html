@@ -1,5 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
@@ -26,24 +27,36 @@
         height: 100vh;
       }
 
-      app-header-layout {
-        padding: var(--app-general-padding);
-      }
-
-      paper-icon-button {
-        margin: 0;
-        --paper-icon-button-ink-color: white;
-      }
-
-      app-toolbar {
+      .toolbar {
         @apply(--layout-horizontal);
+        vertical-align: center;
         font-weight: 100;
         color: #fff; 
         background-color: var(--app-primary-color);
         height: 46px;
       }
 
-      #tabContainer {
+      .main-content {
+        padding: 0;
+      }
+
+      .main-content__button {
+      }
+
+      .main-content__button--back {
+      }
+
+      .main-content__button--menu {
+        margin-left: auto;
+      }
+
+      .main-content__title {
+        @apply(--layout-horizontal);
+        text-transform: uppercase;
+        color: #fff;
+      }
+
+      .main-content__menu {
         display: block;
         width: 100%;
         height: 36px;
@@ -51,40 +64,42 @@
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
       }
 
-      paper-tabs {
-        --paper-tabs-selection-bar-color: #000;
+      .main-content__menu__tabs {
         @apply(--layout-horizontal);
         @apply(--layout-around-justified); 
+        --paper-tabs-selection-bar-color: #000;
         height: 100%;
         margin: 0 var(--app-general-padding);
         text-transform: uppercase;
         font-size: 12px;
       }
 
-      paper-tab > a {
+      .main-content__menu__tab__link {
         @apply(--layout-horizontal);
         @apply(--layout-center-center);
         text-decoration: none;
         color: #000;
       }
 
-      paper-tab > a > iron-icon {
+      .main-content__menu__tab__icon {
         margin-right: 2px;
         height: 16px;
         weight: 16px;
       }
 
-      .main-title {
+      .drawer__title {
         @apply(--layout-horizontal);
-        @apply(--layout-center-justified);
+        @apply(--layout-start-justified);
+        padding-left: 8px; /* icon padding + 2px */
         text-transform: uppercase;
       }
 
-      .drawer-list {
-        margin: 0 20px;
+      .drawer__list {
+        margin: 0 var(--app-general-padding);
       }
 
-      .drawer-list a {
+      .drawer__list__link {
+        outline: none;
         display: block;
         padding: 0 16px;
         text-decoration: none;
@@ -92,9 +107,8 @@
         line-height: 40px;
       }
 
-      .drawer-list a.iron-selected {
-        color: black;
-        font-weight: bold;
+      .drawer__list__icon {
+        margin: 0 6px 3px;
       }
 
       footer {
@@ -113,27 +127,25 @@
         padding-left: 3px;
         text-decoration: none;
       }
-
       
-      @media (min-width: 840px) { 
-        app-header-layout {
-          padding: var(--app-general-padding) var(--app-general-padding-desktop);
+      /* Tablets */
+      @media (min-width: 840px) {
+        .main-content {
+          padding: var(--app-general-padding) var(--app-general-padding-tablet);
         }
-        .main-title {
-          /* Icon Size */
-          margin-left: 40px; 
-        }
-        paper-tabs {
-          margin: 0 var(--app-general-padding-desktop);
+        
+        .main-content__menu__tabs {
+          margin: 0 var(--app-general-padding-tablet);
         }
       }
 
+      /* Desktops */
       @media (min-width: 1260px) { 
-        app-header-layout {
-          padding: var(--app-general-padding) var(--app-general-padding-desktop-max);
+        .main-content {
+          padding: var(--app-general-padding) var(--app-general-padding-desktop);
         }
-        paper-tabs {
-          margin: 0 var(--app-general-padding-desktop-max);
+        .main-content__menu__tabs {
+          margin: 0 var(--app-general-padding-desktop);
         }
       }
 
@@ -148,40 +160,48 @@
       data="{{routeData}}"
       tail="{{subroute}}"></app-route>
 
-    <iron-media-query query="max-width: 640px" query-matches="{{smallScreen}}"></iron-media-query>
+    <iron-media-query query="max-width: 840px" query-matches="{{smallScreen}}"></iron-media-query>
 
     <app-drawer-layout fullbleed>
       <!-- Drawer content -->
       <!-- Lazy-create the drawer for small screen sizes. -->
       <template is="dom-if" if="[[_shouldRenderDrawer]]">
-        <app-drawer>
-          <app-toolbar></app-toolbar>
-          <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-            <a name="list" href="/list/">Election List</a>
-            <a name="new" href="/new/">New Election</a>
+
+        <app-drawer position="right">
+          <app-toolbar class="toolbar">
+            <div class="drawer__title">PolyVote</div>
+          </app-toolbar>
+          <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer__list" role="navigation">
+            <a name="list" href="/list/" class="drawer__list__link">
+              <iron-icon icon="list" class="drawer__list__icon"></iron-icon>Election List
+            </a>
+            <a name="new" href="/new/" class="drawer__list__link">
+              <iron-icon icon="new" class="drawer__list__icon"></iron-icon>New Election
+            </a>
           </iron-selector>
         </app-drawer>
       </template>
+
       <!-- Main content -->
-      <app-header-layout id="headerLayout" flex>
+      <app-header-layout id="headerLayout" class="main-content" flex>
         <app-header condenses reveals fixed>
-          <app-toolbar>
-            <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-            <div class="main-title" main-title>PolyVote</div>
-            <paper-icon-button icon="search"></paper-icon-button>
+          <app-toolbar class="toolbar">
+            <paper-icon-button icon="back" class="main-content__button main-content__button--back"></paper-icon-button>
+            <div class="main-content__title" main-title>{{route.path}}</div>
+            <paper-icon-button icon="menu" class="main-content__button main-content__button--menu" drawer-toggle></paper-icon-button>
           </app-toolbar>
           <!-- Lazy-create the tabs for larger screen sizes. -->
           <template is="dom-if" if="[[_shouldRenderTabs]]">
-            <div id="tabContainer">
-              <paper-tabs selected="[[pageName]]" attr-for-selected="name" noink>
+            <div class="main-content__menu">
+              <paper-tabs selected="[[pageName]]" class="main-content__menu__tabs" attr-for-selected="name" noink>
                 <paper-tab name="list">
-                  <a href="/list/">
-                    <iron-icon icon="list"></iron-icon>Election List
+                  <a href="/list/" class="main-content__menu__tab__link">
+                    <iron-icon icon="list" class="main-content__menu__tab__icon"></iron-icon>Election List
                   </a>
                 </paper-tab>
                 <paper-tab name="new">
-                  <a href="/new/">
-                    <iron-icon icon="new"></iron-icon>New Election
+                  <a href="/new/" class="main-content__menu__tab__link">
+                    <iron-icon icon="new" class="main-content__menu__tab__icon"></iron-icon>New Election
                   </a>
                 </paper-tab>
               </paper-tabs>
@@ -198,18 +218,24 @@
           <polyvote-list 
             name="list"
             load-complete="{{loadComplete}}"
-            route="{{route}}"></polyvote-list>
+            route="{{route}}"
+            mobile-title="{{mobileTitle}}"
+            small-screen="[[smallScreen]]"></polyvote-list>
 
           <polyvote-new 
             name="new" 
             load-complete="{{loadComplete}}"
-            route="{{route}}"></polyvote-new>
+            route="{{route}}"
+            mobile-title="{{mobileTitle}}"
+            small-screen="[[smallScreen]]"></polyvote-new>
 
           <polyvote-item
             name="item"
             item-name='election'
             load-complete="{{loadComplete}}"
-            route="{{subroute}}"></polyvote-item>
+            route="{{subroute}}"
+            mobile-title="{{mobileTitle}}"
+            small-screen="[[smallScreen]]"></polyvote-item>
           
           <polyvote-e404
             name="e404"></polyvote-e404>
@@ -236,15 +262,20 @@
       is: 'polyvote-app',
 
       properties: {
+
         page: {
           type: String,
           reflectToAttribute: true,
           observer: '_pageChanged'
         },
+
         path: {
           type: String,
           observer: '_pathChanged'
         },
+
+        mobileTitle: String,
+
         year: {
           type: Boolean,
           readOnly: true,
@@ -252,16 +283,20 @@
             return new Date().getFullYear();
           }
         },
+
         loadComplete: {
           type: Boolean,
           value: false
         },
+
         _shouldRenderDrawer: {
           computed: '_computeShouldRenderDrawer(smallScreen, loadComplete)'
         },
+
         _shouldRenderTabs: {
           computed: '_computeShouldRenderTabs(smallScreen, loadComplete)'
         }
+
       },
 
       observers: [
@@ -313,7 +348,7 @@
         this.page = 'e404';
       },
 
-      _pageLoaded() {
+      _pageLoaded(ee,rrr) {
         this._ensureLazyLoaded();
       },
 
@@ -327,7 +362,6 @@
               //  navigator.serviceWorker.register('/service-worker.js');
               //}
               //this._notifyNetworkStatus();
-              console.log("RENDER COMPLETE");
               this.loadComplete = true;
               this.$.headerLayout.resetLayout();
             });

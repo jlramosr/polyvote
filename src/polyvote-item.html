@@ -19,9 +19,9 @@
       data="{{routeData}}"
       tail="{{subroute}}"></app-route>
 
-    <polyvote-db id="db" data="{{item}}" url="../db/election.json" loading="{{loading}}"></polyvote-db>
-    <paper-spinner class="spinner" active="[[loading]]"></paper-spinner>
-    
+    <polyvote-db document id="db" document-data="{{item}}" collection="elections" item-id="{{itemId}}" loading="{{loadingDb}}"></polyvote-db>
+    <paper-spinner class="spinner" active="[[loadingDb]]"></paper-spinner>
+
   </template>
 </dom-module>
 
@@ -35,19 +35,23 @@
 
       properties: {
 
-        loading: Boolean,
+        itemId: String,
 
-        routeData: Object, 
+        routeData: {
+          type: Object,
+          observer: '_routeChanged'
+        },
 
-        item: Object,
+        item: {
+          type: Object,
+          observer: '_itemChanged'
+        },
+
+        loadingDb: Boolean,
 
         loadComplete: Boolean
 
       },
-
-      observers: [
-        '_routeItemChanged(routeData, item)'
-      ],
 
       listeners: {
         'vote-item-tapped': '_voteItem',
@@ -55,9 +59,13 @@
         'view-results-item-tapped': '_viewResultsItem'
       },
 
-      _routeItemChanged(routeData, item) {
-        const itemId = routeData.item_id;
-        const action = routeData.action;
+      _routeChanged(routeData) {
+        this.itemId = routeData.item_id;
+      },
+
+      _itemChanged(item) {
+        const itemId = this.routeData.item_id;
+        const action = this.routeData.action;
         
         //Put default action if it is not in url
         if (!action) {
@@ -69,13 +77,13 @@
           console.log("routeData",routeData, "item", item);
           POR AQUI PASA 4 VECES (mirar pathChanged de polyvote-app)
         */
-        const itemContainer = this.$$('#itemContainer');
+        let itemContainer = this.$$('#itemContainer');
         if (itemContainer) {
           Polymer.dom(this.root).removeChild(itemContainer);
           itemContainer = null;
         }
 
-        if (itemId && item.id) {
+        if (!this._emptyObject(item)) {
           itemContainer = document.createElement(`polyvote-item-${action}`);
           Polymer.dom(this.root).appendChild(itemContainer);
           itemContainer.item = this.item;

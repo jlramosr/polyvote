@@ -75,7 +75,7 @@
     <polyvote-db id="db" collection="elections" data="{{items}}" loading="{{loadingDb}}"></polyvote-db>    
     <paper-spinner class="spinner" active="[[loadingDb]]"></paper-spinner>
 
-    <h1 class="title">Election List</h1>
+    <h1 class="title" hidden$="[[smallScreen]]">List Elections</h1>
 
     <div id="content" class="content--list">
 
@@ -128,6 +128,13 @@
         notify: true
       },
 
+      mobileTitle: {
+        type: String,
+        notify: true
+      },
+
+      smallScreen: Boolean,
+
       loadingDb: Boolean,
 
       loadComplete: Boolean
@@ -141,9 +148,13 @@
       'delete-item-tapped': '_deleteItem'
     },
 
+    ready() {
+      this.mobileTitle = 'Elections';
+    },
+
     _computeItemClass(index) {
       if (index == this.items.length - 1) {
-        return 'item--last-child'
+        return 'item--last-child';
       }
     },
 
@@ -168,8 +179,8 @@
     },
 
     _itemTapped(event) {
-      const item = event.model.__data__.item;
-      this.set('route.path', `/item/${item.id}/view`);
+      const itemId = event.model.__data__.item.$key;
+      this.set('route.path', `/item/${itemId}/view`);
     },
 
     _viewNewItemTapped() {
