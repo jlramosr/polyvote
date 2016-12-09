@@ -1,0 +1,125 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-slider/paper-slider.html">
+
+<link rel="import" href="polyvote-db.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="polyvote-item-results">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        position: relative;
+      }
+
+      .slider__row {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        font-size: 12px;
+        padding: 10px;
+        text-align: center;
+        background: grey;
+      }
+
+      .slider__row--soft {
+        background: #FAFAFA;
+      }
+
+      .slider__row--strong {
+        background: #F3F3F3;
+      }
+
+      .slider__title {
+        width: 30%;
+        color: var(--app-primary-color);
+        font-weight: 700;
+      }
+
+      .slider__line {
+        width: 50%;
+        margin: 0 14px;
+        --paper-slider-disabled-active-color: var(--app-secondary-color);
+        --paper-slider-disabled-secondary-color: var(--app-secondary-color);
+        --paper-slider-disabled-knob-color: var(--app-secondary-color);
+        --paper-slider-container-color: var(--app-secondary-color-soft);
+      }
+
+      .slider__total {
+        width: 20%;
+        font-weight: 700;
+        color: var(--app-secondary-color);
+      }
+
+      .total {
+        @apply(--layout-horizontal);
+        @apply(--layout-center-justified);
+        font-weight: 700;
+        color: var(--app-secondary-color);
+      }
+    </style>
+    
+    <h1 class="title">[[item.title]] - Election Results</h1>
+    <div id="resultsContainer" class="content--box" hidden>
+
+      <p id="description" class="description">[[item.description]]</p>
+
+      <template is="dom-repeat" items="[[item.options]]" as="option" id="optionsTemplate">
+        <div class$="slider__row [[_computeSliderRowBackground(index)]]">
+          <span class="slider__title">[[option.title]]</span>
+          <paper-slider 
+            class="slider__line"
+            disabled
+            min="0"
+            max="100"
+            value="[[_computeValueSlider(index)]]"></paper-slider>
+          <span class="slider__total">[[_computeTotalText(index)]]</span>
+        </div>
+      </template>
+
+      <p class="total">[[item.numVotes]] votes</p>
+
+    </div>
+    
+  </template>
+
+</dom-module>
+
+<script>
+  (function() {
+    'use strict';
+
+    Polymer({
+
+      is: 'polyvote-item-results',
+
+      properties: {
+
+        item: Object
+
+      },
+
+      render() {
+        this.$.optionsTemplate.render();
+        this.$.resultsContainer.removeAttribute('hidden');
+      },
+
+      _computeSliderRowBackground(index) {
+        if (index % 2) 
+          return 'slider__row--soft';
+        return 'slider__row--strong';
+      },
+
+      _computeValueSlider(index) {
+        return (this.item.options[index].votes * 100 / this.item.numVotes).toFixed(2);
+      },
+
+      _computeTotalText(index) {
+        const votes = this.item.options[index].votes;
+        const percent = (votes * 100 / this.item.numVotes).toFixed(2);
+        return `${percent}% (${votes} votes)`
+      }
+
+    });
+    
+  })();
+</script>

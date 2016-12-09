@@ -1,0 +1,366 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+
+<link rel="import" href="shared-styles.html">
+
+<!-- Configurations -->
+<link rel="import" href="polyvote-core.html">
+
+<!-- Since 'list' is the default route, eagerly load it. -->
+<link rel="import" href="polyvote-list.html">
+
+<dom-module id="polyvote-app">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        height: 100vh;
+      }
+
+      app-header-layout {
+        padding: var(--app-general-padding);
+      }
+
+      paper-icon-button {
+        margin: 0;
+        --paper-icon-button-ink-color: white;
+      }
+
+      app-toolbar {
+        @apply(--layout-horizontal);
+        font-weight: 100;
+        color: #fff; 
+        background-color: var(--app-primary-color);
+        height: 46px;
+      }
+
+      #tabContainer {
+        display: block;
+        width: 100%;
+        height: 36px;
+        background: var(--app-primary-color-soft);
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      paper-tabs {
+        --paper-tabs-selection-bar-color: #000;
+        @apply(--layout-horizontal);
+        @apply(--layout-around-justified); 
+        height: 100%;
+        margin: 0 var(--app-general-padding);
+        text-transform: uppercase;
+        font-size: 12px;
+      }
+
+      paper-tab > a {
+        @apply(--layout-horizontal);
+        @apply(--layout-center-center);
+        text-decoration: none;
+        color: #000;
+      }
+
+      paper-tab > a > iron-icon {
+        margin-right: 2px;
+        height: 16px;
+        weight: 16px;
+      }
+
+      .main-title {
+        @apply(--layout-horizontal);
+        @apply(--layout-center-justified);
+        text-transform: uppercase;
+      }
+
+      .drawer-list {
+        margin: 0 20px;
+      }
+
+      .drawer-list a {
+        display: block;
+        padding: 0 16px;
+        text-decoration: none;
+        color: var(--app-secondary-color);
+        line-height: 40px;
+      }
+
+      .drawer-list a.iron-selected {
+        color: black;
+        font-weight: bold;
+      }
+
+      footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: 12px;
+        line-height: 24px;
+        font-size: 11px;
+        color: var(--app-secondary-color);
+      }
+
+      footer > a {
+        color: var(--app-primary-color);
+        padding-left: 3px;
+        text-decoration: none;
+      }
+
+      
+      @media (min-width: 840px) { 
+        app-header-layout {
+          padding: var(--app-general-padding) var(--app-general-padding-desktop);
+        }
+        .main-title {
+          /* Icon Size */
+          margin-left: 40px; 
+        }
+        paper-tabs {
+          margin: 0 var(--app-general-padding-desktop);
+        }
+      }
+
+      @media (min-width: 1260px) { 
+        app-header-layout {
+          padding: var(--app-general-padding) var(--app-general-padding-desktop-max);
+        }
+        paper-tabs {
+          margin: 0 var(--app-general-padding-desktop-max);
+        }
+      }
+
+    </style>
+
+    <polyvote-core></polyvote-core>
+    
+    <app-location route="{{route}}" path="{{path}}"></app-location>
+    <app-route
+      route="{{route}}"
+      pattern="/:page"
+      data="{{routeData}}"
+      tail="{{subroute}}"></app-route>
+
+    <iron-media-query query="max-width: 640px" query-matches="{{smallScreen}}"></iron-media-query>
+
+    <app-drawer-layout fullbleed>
+      <!-- Drawer content -->
+      <!-- Lazy-create the drawer for small screen sizes. -->
+      <template is="dom-if" if="[[_shouldRenderDrawer]]">
+        <app-drawer>
+          <app-toolbar></app-toolbar>
+          <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+            <a name="list" href="/list/">Election List</a>
+            <a name="new" href="/new/">New Election</a>
+          </iron-selector>
+        </app-drawer>
+      </template>
+      <!-- Main content -->
+      <app-header-layout id="headerLayout" flex>
+        <app-header condenses reveals fixed>
+          <app-toolbar>
+            <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
+            <div class="main-title" main-title>PolyVote</div>
+            <paper-icon-button icon="search"></paper-icon-button>
+          </app-toolbar>
+          <!-- Lazy-create the tabs for larger screen sizes. -->
+          <template is="dom-if" if="[[_shouldRenderTabs]]">
+            <div id="tabContainer">
+              <paper-tabs selected="[[pageName]]" attr-for-selected="name" noink>
+                <paper-tab name="list">
+                  <a href="/list/">
+                    <iron-icon icon="list"></iron-icon>Election List
+                  </a>
+                </paper-tab>
+                <paper-tab name="new">
+                  <a href="/new/">
+                    <iron-icon icon="new"></iron-icon>New Election
+                  </a>
+                </paper-tab>
+              </paper-tabs>
+            </div>
+          </template>
+        </app-header>
+
+        <iron-pages
+          selected="[[page]]"
+          attr-for-selected="name"
+          fallback-selection="e404"
+          role="main">
+
+          <polyvote-list 
+            name="list"
+            load-complete="{{loadComplete}}"
+            route="{{route}}"></polyvote-list>
+
+          <polyvote-new 
+            name="new" 
+            load-complete="{{loadComplete}}"
+            route="{{route}}"></polyvote-new>
+
+          <polyvote-item
+            name="item"
+            item-name='election'
+            load-complete="{{loadComplete}}"
+            route="{{subroute}}"></polyvote-item>
+          
+          <polyvote-e404
+            name="e404"></polyvote-e404>
+          
+        </iron-pages>
+        <!--
+        <footer>
+          &copy; {{year}} PolyVote by<a href='https://github.com/jlramosr'>Jose Ramos</a>
+        </footer>
+        -->
+      </app-header-layout>
+    </app-drawer-layout>
+        
+
+  </template>
+</dom-module>
+
+<script>
+  (function() {
+    'use strict';
+
+    Polymer({
+
+      is: 'polyvote-app',
+
+      properties: {
+        page: {
+          type: String,
+          reflectToAttribute: true,
+          observer: '_pageChanged'
+        },
+        path: {
+          type: String,
+          observer: '_pathChanged'
+        },
+        year: {
+          type: Boolean,
+          readOnly: true,
+          value: () => {
+            return new Date().getFullYear();
+          }
+        },
+        loadComplete: {
+          type: Boolean,
+          value: false
+        },
+        _shouldRenderDrawer: {
+          computed: '_computeShouldRenderDrawer(smallScreen, loadComplete)'
+        },
+        _shouldRenderTabs: {
+          computed: '_computeShouldRenderTabs(smallScreen, loadComplete)'
+        }
+      },
+
+      observers: [
+        '_routePageChanged(routeData.page)'
+      ],
+
+      created() {
+        // Custom elements polyfill safe way to indicate an element has been upgraded.
+        this.removeAttribute('unresolved');
+      },
+
+      ready() {
+        // listen for online/offline
+        Polymer.RenderStatus.afterNextRender(this, function() {
+          this.listen(window, 'online', '_notifyNetworkStatus');
+          this.listen(window, 'offline', '_notifyNetworkStatus');
+        });
+      },
+
+      /**
+      * When the path changes, this function forces all paths ends with '/'.
+      */
+      _pathChanged(path) {
+        if (path && !path.endsWith('/')) {
+          this.set('path', path + '/');
+        }
+      },
+      
+      _routePageChanged(page) {
+        this.page = page || 'list';
+      },
+
+      _pageChanged(page, oldPage) {
+        if (page != null) {
+          // list route is eagerly loaded
+          if (page == 'list') {
+            this._pageLoaded(Boolean(oldPage));
+          // other routes are lazy loaded
+          }
+          else {
+            // Load page import on demand. Show 404 page if fails
+            const resolvedPageUrl = this.resolveUrl(`polyvote-${page}.html`);
+            this.importHref(resolvedPageUrl, this._pageLoaded, this._showPage404, true);
+          }
+        }
+      },
+
+      _showPage404() {
+        this.page = 'e404';
+      },
+
+      _pageLoaded() {
+        this._ensureLazyLoaded();
+      },
+
+      _ensureLazyLoaded() {
+        // load lazy resources after render and set `loadComplete` when done.
+        if (!this.loadComplete) {
+          Polymer.RenderStatus.afterNextRender(this, function() {
+            this.importHref(this.resolveUrl('lazy-resources.html'), function() {
+              // Register service worker if supported.
+              //if ('serviceWorker' in navigator) {
+              //  navigator.serviceWorker.register('/service-worker.js');
+              //}
+              //this._notifyNetworkStatus();
+              console.log("RENDER COMPLETE");
+              this.loadComplete = true;
+              this.$.headerLayout.resetLayout();
+            });
+          });
+        }
+      },
+
+      _notifyNetworkStatus: function() {
+        let oldOffline = this.offline;
+        this.offline = !navigator.onLine;
+        // Show the snackbar if the user is offline when starting a new session
+        // or if the network status changed.
+        if (this.offline || (!this.offline && oldOffline === true)) {
+          console.log("ESTAS OFFLINE");
+          /*if (!this._networkSnackbar) {
+            this._networkSnackbar = document.createElement('shop-snackbar');
+            Polymer.dom(this.root).appendChild(this._networkSnackbar);
+          }
+          Polymer.dom(this._networkSnackbar).innerHTML = this.offline ?
+              'You are offline' : 'You are online';
+          this._networkSnackbar.open();*/       
+        }
+      },
+
+      _computeShouldRenderDrawer(smallScreen, loadComplete) {
+        return smallScreen && loadComplete;
+      },
+
+      _computeShouldRenderTabs(smallScreen, loadComplete) {
+        return !smallScreen && loadComplete;
+      }
+
+    });
+
+  })();
+</script>

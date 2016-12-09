@@ -1,0 +1,65 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+
+<link rel="import" href="polyvote-db.html">
+<link rel="import" href="polyvote-new.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="polyvote-item-edit">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        position: relative;
+      }
+    </style>
+    
+    <polyvote-new
+      edit
+      id="[[item.id]]"
+      title-header="[[item.title]]"
+      title="[[item.title]]"
+      description="[[item.description]]"
+      option1="[[_getTitleOption1(item)]]"
+      options="[[_getTitleRestOptions(item)]]"
+      multiple="[[item.multiple]]"
+      custom="[[item.custom]]"
+      chars="[[item.chars]]"
+      load-complete="{{loadComplete}}"></polyvote-new>
+
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+
+      is: 'polyvote-item-edit',
+
+      properties: {
+
+        item: Object,
+
+        loadComplete: Boolean
+
+      },
+
+      _getTitleOption1(item) {
+        return item.options[0].title;
+      },
+
+      _getTitleRestOptions(item) {
+        let options = [];
+        item.options.map((option,index) => { 
+          if (index > 0 && !option.custom)
+            options.push(option);
+        });
+        return options;
+      } 
+
+    });
+
+  })();
+  </script>
+</dom-module>

@@ -1,0 +1,28 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/polymerfire/firebase.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+
+<dom-module id="polyvote-core">
+  <template>
+
+    <firebase-app
+      name="polyvote"
+      auth-domain="polyvote-e8c0a.firebaseapp.com"
+      database-url="https://polyvote-e8c0a.firebaseio.com"
+      api-key="AIzaSyDld5TuIzVB_uN8hRDz5fzE6Kwl8NQdGdI"></firebase-app>
+
+  </template>
+</dom-module>
+
+<script>
+  (function() {
+    'use strict';
+
+    Polymer({
+
+      is: 'polyvote-core'
+
+    });
+
+  })();
+</script>

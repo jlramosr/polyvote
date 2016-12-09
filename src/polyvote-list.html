@@ -1,0 +1,208 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import" href="../bower_components/lodash/lodash.js">
+
+<link rel="import" href="polyvote-db.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="polyvote-list">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        position: relative;
+      }
+
+      .item {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        background: #fff;
+        border-bottom: 1px solid var(--app-primary-color-soft);
+        cursor: pointer;
+        padding: 20px;
+        max-height: 80px; 
+      }
+
+      .item:hover {
+        background: var(--app-primary-color-light);;
+      }
+
+      .item--last-child {
+        border-bottom: none;
+      }
+
+      .item__image {
+        background-color: #ddd;
+        border-radius: 50%;
+        height: 52px;
+        width: 52px;
+      }
+
+      .item__detail {
+        @apply(--layout-flex);
+        padding: 0 20px;
+        overflow: hidden;
+      }
+
+      .item__title {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--app-primary-color);
+        text-transform: uppercase;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .item__description {
+        font-size: 12px;
+        color: #888;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .item__icon {
+        color: var(--app-primary-color);
+      }
+
+    </style>
+
+    <polyvote-db id="db" collection="elections" data="{{items}}" loading="{{loadingDb}}"></polyvote-db>    
+    <paper-spinner class="spinner" active="[[loadingDb]]"></paper-spinner>
+
+    <h1 class="title">Election List</h1>
+
+    <div id="content" class="content--list">
+
+      <iron-list items="[[items]]">
+        <template>
+          <div class$="item [[_computeItemClass(index)]]" on-tap="_itemTapped" tabindex$="[[tabIndex]]">
+            <iron-image class="item__image" sizing="contain" src="[[item.image]]"></iron-image>
+            <div class="item__detail">
+              <div class="item__title">[[item.title]]</div>
+              <p class="item__description">[[item.description]]</p>
+            </div>
+            <paper-icon-button
+              class="item__icon"
+              noink
+              tabindex="-1"
+              icon="more"
+              on-tap="_itemMenuTapped"></paper-icon-button>
+          </div>
+        </template>
+      </iron-list>
+
+    </div>
+
+    <div class="fabs">
+      <paper-fab class="fabs__fab" icon="add" on-tap="_viewNewItemTapped"></paper-fab>
+    </div>
+
+    <!-- Lazy Creations -->
+    <template is="dom-if" if="[[loadComplete]]">
+      <polyvote-list-actions id="itemMenuDialog"></polyvote-list-actions>
+    </template>
+
+  </template>
+</dom-module>
+
+<script>
+(function() {
+  'use strict';
+
+  Polymer({
+
+    is: 'polyvote-list',
+
+    properties: {
+
+      items: Object,
+
+      route: {
+        type: String,
+        notify: true
+      },
+
+      loadingDb: Boolean,
+
+      loadComplete: Boolean
+    },
+
+    listeners: {
+      'view-info-item-tapped': '_viewInfoItem',
+      'view-vote-item-tapped': '_viewVoteItem',
+      'view-edit-item-tapped': '_viewEditItem',
+      'view-results-item-tapped': '_viewResultsItem',
+      'delete-item-tapped': '_deleteItem'
+    },
+
+    _computeItemClass(index) {
+      if (index == this.items.length - 1) {
+        return 'item--last-child'
+      }
+    },
+
+    _itemMenuTapped(event) {
+      event.stopPropagation();
+      const item = event.model.__data__.item;
+      const dialog = Polymer.dom(this.root).querySelector('polyvote-list-actions');
+
+      window.addEventListener('scroll', _ => {
+        dialog.opened = false; 
+      })
+
+      if (dialog.opened) {
+        dialog.opened = false;
+      }
+
+      dialog.item = item;
+      dialog.positionTarget = event.currentTarget;
+      dialog.positionTargetX = event.detail.x;
+      dialog.positionTargetY = event.detail.y;
+      dialog.opened = true;
+    },
+
+    _itemTapped(event) {
+      const item = event.model.__data__.item;
+      this.set('route.path', `/item/${item.id}/view`);
+    },
+
+    _viewNewItemTapped() {
+      this.set('route.path', `/new`);
+    },
+    
+    _viewInfoItem(event) {
+      const item = event.detail;
+      //MOSTRAR DIALOGO
+    },
+
+    _viewVoteItem(event) {
+      const item = event.detail;
+      this.set('route.path', `/item/${item.id}/view`);
+    },
+
+    _viewEditItem(event) {
+      const item = event.detail;
+      this.set('route.path', `/item/${item.id}/edit`);
+    },
+
+    _viewResultsItem(event) {
+      const item = event.detail;
+      this.set('route.path', `/item/${item.id}/results`);
+    },
+
+    _deleteItem(event) {
+      const item = event.detail;
+      this.$.db.deleteItem({"id": item.id});
+      this.set('route.path', `/list`);
+    }
+
+  });
+
+})();
+</script>

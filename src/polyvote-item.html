@@ -1,0 +1,121 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import" href="polyvote-db.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="polyvote-item">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+
+    <app-route
+      route="{{route}}"
+      pattern="/:item_id/:action"
+      data="{{routeData}}"
+      tail="{{subroute}}"></app-route>
+
+    <polyvote-db id="db" data="{{item}}" url="../db/election.json" loading="{{loading}}"></polyvote-db>
+    <paper-spinner class="spinner" active="[[loading]]"></paper-spinner>
+    
+  </template>
+</dom-module>
+
+<script>
+  (function() {
+    'use strict';
+
+    Polymer({
+
+      is: 'polyvote-item',
+
+      properties: {
+
+        loading: Boolean,
+
+        routeData: Object, 
+
+        item: Object,
+
+        loadComplete: Boolean
+
+      },
+
+      observers: [
+        '_routeItemChanged(routeData, item)'
+      ],
+
+      listeners: {
+        'vote-item-tapped': '_voteItem',
+        'view-edit-item-tapped': '_viewEditItem',
+        'view-results-item-tapped': '_viewResultsItem'
+      },
+
+      _routeItemChanged(routeData, item) {
+        const itemId = routeData.item_id;
+        const action = routeData.action;
+        
+        //Put default action if it is not in url
+        if (!action) {
+          this.set('routeData.action', 'view');
+          return;
+        }
+
+        /*
+          console.log("routeData",routeData, "item", item);
+          POR AQUI PASA 4 VECES (mirar pathChanged de polyvote-app)
+        */
+        const itemContainer = this.$$('#itemContainer');
+        if (itemContainer) {
+          Polymer.dom(this.root).removeChild(itemContainer);
+          itemContainer = null;
+        }
+
+        if (itemId && item.id) {
+          itemContainer = document.createElement(`polyvote-item-${action}`);
+          Polymer.dom(this.root).appendChild(itemContainer);
+          itemContainer.item = this.item;
+          itemContainer.loadComplete = this.loadComplete;
+          itemContainer.setAttribute('id', 'itemContainer');
+          
+          const resolvedPageUrl = this.resolveUrl(`polyvote-item-${action}.html`);
+          this.importHref(resolvedPageUrl, 
+                          _ => {
+                            if (itemContainer.render) {
+                              itemContainer.render();   
+                            }                             
+                          }, 
+                          null, 
+                          true);
+        }
+        else {
+          //this.set('route.path', `/hola`);
+        }
+      },
+
+      _voteItem(event) {
+        this.$.db.updateItem(event.detail);
+        this.set('routeData.action', 'results');
+      },
+
+      _viewEditItem(event) {
+        this.set('routeData.action', 'edit');
+      },
+
+      _viewResultsItem(event) {
+        this.set('routeData.action', 'results');
+      },
+
+      _emptyObject(obj) {
+        return Object.keys(obj).length === 0 && obj.constructor === Object
+      }
+
+    });
+
+  })();
+</script>
+

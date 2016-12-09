@@ -1,0 +1,120 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+
+<dom-module id="polyvote-db">
+  <template>
+
+    <template is="dom-if" if="[[document]]">
+      <firebase-document
+        id="document"
+        app-name="polyvote"
+        path="/[[collection]]/{{itemId}}"
+        data="{{documentData}}">
+      </firebase-document>
+    </template>
+
+    <template is="dom-if" if="[[!document]]">
+      <firebase-query
+        id="query"
+        app-name="polyvote"
+        path="/[[collection]]"
+        data="{{data}}">
+      </firebase-query>
+    </template>
+
+  </template>
+</dom-module>
+
+<script>
+  (function() {
+    'use strict';
+
+    Polymer({
+
+      is: 'polyvote-db',
+
+
+      properties: {
+        /**
+          * It will be true if we want access to a document of a database (one document, no more)
+          */
+        document: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+          * The name of the collection. It will be used like database endpoint.
+          */
+        collection: String,
+
+        /**
+          * Document Id.
+          */
+        itemId: {
+          type: String,
+          notify: true
+        },
+
+        /**
+          * Document object data.
+          */
+        documentData: {
+          type: Object,
+          notify: true
+        },
+
+        /**
+          * Objects of a collection.
+          */
+        data: {
+          type: Object,
+          notify: true
+        },
+          
+        loading: { 
+          type: Boolean,
+          notify: true
+        }
+
+      },
+
+      getItem(id) {
+        console.log("getItem", id);
+      },
+
+      /**
+        * Add a new item in the database document.
+        *
+        * @param {Object} The item to add.
+        */
+      createItem(item) {
+        this.loading = true;
+        let _document = this.$$('#document');
+        this.documentData = item;
+        _document.save(_document.path)
+          .then(_ => { 
+            // Success Save (add automatically /itemId to path element)
+            this.itemId = _document.path.split('/')[2];
+            this.loading = false;
+          })
+          .catch(_ => { 
+            // Failure Save
+            console.log("ITEM CREATE ERORR");
+            this.loading = false;
+          });
+      },
+
+      updateItem(params) {
+        console.log("updatetItem", params); 
+      },
+
+      deleteItem(item) {
+        console.log("deleteItem", item); 
+      }
+      
+    });
+
+  })();
+</script>

@@ -1,0 +1,155 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../bower_components/paper-radio-button/paper-radio-button.html">
+
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="polyvote-item-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        position: relative;
+      }
+
+      .radios {
+        outline: 0;
+        display: block;
+      }
+
+      .radios__row {
+        display: block;
+        font-size: 16px;
+        padding: 8px !important;
+      }
+
+      .radios__row[checked] {
+        font-weight: 500;
+      }
+      
+      .radios__row__section--custom {
+        display: inherit;
+        vertical-align: middle;
+      }
+
+      .input {
+        --paper-input-container: {
+          padding: 0px !important;
+        }
+      }
+    </style>
+
+    <h1 class="title">{{item.title}}</h1>
+    <div id="itemContainer" class="content--box" hidden>
+
+      <p id="description" class="description">{{item.description}}</p>
+
+      <paper-radio-group id="radioGroup" class="radios" selectable="[[_computeSelectable(item.multiple)]]"> 
+        <template is="dom-repeat" items="[[item.options]]" as="option" id="optionsTemplate">
+          <paper-radio-button class="radios__row" noink name="{{index}}">
+            <span hidden="[[!item.chars]]">[[_getRadioButtonIndexChar(index)]])</span>
+            [[option.title]]
+          </paper-radio-button>
+        </template>
+        <template is="dom-if" if="[[item.custom]]" id="customOptionTemplate">
+          <paper-radio-button class="radios__row" noink name="other">
+            <span class="radios__row__section--custom" hidden="[[!item.chars]]">
+              [[_getRadioButtonIndexChar(item.options.length)]])
+            </span>
+            <paper-input
+              class="radios__row__section--custom input"
+              label="Other"
+              required
+              error-message="If it's checked, it can't be empty"
+              no-label-float>
+            </paper-input>
+          </paper-radio-button>
+        </template>
+      </paper-radio-group>
+
+      <div class="buttons">
+        <paper-button class="buttons__button" on-tap="_voteTapped">Vote</paper-button>
+      </div>
+
+      <span id="error" class="error" hidden>You have at least one option selected</span>
+
+    </div>
+
+    <div class="fabs">
+      <paper-fab class="fabs__fab" icon="edit" on-tap="_viewEditTapped"></paper-fab>
+      <paper-fab class="fabs__fab" icon="timeline" on-tap="_viewResultsTapped"></paper-fab>
+    <div>
+
+  </template>
+</dom-module>
+
+<script>
+  (function() {
+    'use strict';
+
+    Polymer({
+
+      is: 'polyvote-item-view',
+
+      properties: {
+        
+        item: Object
+
+      },
+
+      render() {
+        this.$.optionsTemplate.render();
+        this.$.customOptionTemplate.render();
+        this.$.itemContainer.removeAttribute('hidden');
+      },
+
+      _computeSelectable(multiple) {
+        if (multiple) {
+          return 'none';
+        } 
+        return 'paper-radio-button';
+      },
+
+      _voteTapped() {
+        this.$.error.setAttribute('hidden');
+        const indexSelected = this.$.radioGroup.selected;
+        if (indexSelected !== undefined) {
+          const customOptionInput = this.$$('paper-input');
+          let titleSelected;
+          if (indexSelected == 'other') {
+            customOptionInput.setAttribute('required','');
+            titleSelected = customOptionInput.value;
+          }
+          else {
+            customOptionInput.removeAttribute('required');
+            titleSelected = this.item.options[indexSelected].title;
+          }
+          if (customOptionInput.validate()) {
+            this.fire('vote-item-tapped', {"vote": true,
+                                           "index": indexSelected,
+                                           "title": titleSelected});
+          }
+        }
+        else {
+          this.$.error.removeAttribute('hidden');
+        }
+      },
+
+      _viewEditTapped() {
+        this.fire('view-edit-item-tapped', {"id": this.item.id});
+      },
+
+      _viewResultsTapped() {
+        this.fire('view-results-item-tapped', {"id": this.item.id});
+      },
+
+      _getRadioButtonIndexChar(index) {
+        return String.fromCharCode(65 + (index % 26));
+      }
+
+    });
+
+  })();
+</script>
