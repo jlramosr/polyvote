@@ -130,8 +130,16 @@
       
       /* Tablets */
       @media (min-width: 840px) {
+        .toolbar {
+          height: 58px;
+        }
+
         .main-content {
           padding: var(--app-general-padding) var(--app-general-padding-tablet);
+        }
+
+        .main-content__title {
+          padding-left: var(--app-general-padding-tablet);
         }
         
         .main-content__menu__tabs {
@@ -140,10 +148,19 @@
       }
 
       /* Desktops */
-      @media (min-width: 1260px) { 
+      @media (min-width: 1260px) {
+        .toolbar {
+          height: 64px;
+        }
+
         .main-content {
           padding: var(--app-general-padding) var(--app-general-padding-desktop);
         }
+
+        .main-content__title {
+          padding-left: var(--app-general-padding-desktop);
+        }
+
         .main-content__menu__tabs {
           margin: 0 var(--app-general-padding-desktop);
         }
@@ -162,12 +179,12 @@
 
     <iron-media-query query="max-width: 840px" query-matches="{{smallScreen}}"></iron-media-query>
 
-    <app-drawer-layout fullbleed>
+    <app-drawer-layout fullbleed responsive-width="840px">
       <!-- Drawer content -->
       <!-- Lazy-create the drawer for small screen sizes. -->
       <template is="dom-if" if="[[_shouldRenderDrawer]]">
 
-        <app-drawer position="right">
+        <app-drawer id="drawer" align="right" swipe-open>
           <app-toolbar class="toolbar">
             <div class="drawer__title">PolyVote</div>
           </app-toolbar>
@@ -186,8 +203,10 @@
       <app-header-layout id="headerLayout" class="main-content" flex>
         <app-header condenses reveals fixed>
           <app-toolbar class="toolbar">
-            <paper-icon-button icon="back" class="main-content__button main-content__button--back"></paper-icon-button>
-            <div class="main-content__title" main-title>{{route.path}}</div>
+            <paper-icon-button icon="back" class="main-content__button main-content__button--back" hidden$=[[!smallScreen]]></paper-icon-button>
+            <div class="main-content__title" main-title>
+              [[_getPageTitle(page, itemTitle, smallScreen)]]
+            </div>
             <paper-icon-button icon="menu" class="main-content__button main-content__button--menu" drawer-toggle></paper-icon-button>
           </app-toolbar>
           <!-- Lazy-create the tabs for larger screen sizes. -->
@@ -219,14 +238,12 @@
             name="list"
             load-complete="{{loadComplete}}"
             route="{{route}}"
-            mobile-title="{{mobileTitle}}"
             small-screen="[[smallScreen]]"></polyvote-list>
 
           <polyvote-new 
             name="new" 
             load-complete="{{loadComplete}}"
             route="{{route}}"
-            mobile-title="{{mobileTitle}}"
             small-screen="[[smallScreen]]"></polyvote-new>
 
           <polyvote-item
@@ -234,7 +251,7 @@
             item-name='election'
             load-complete="{{loadComplete}}"
             route="{{subroute}}"
-            mobile-title="{{mobileTitle}}"
+            item-title="{{itemTitle}}"
             small-screen="[[smallScreen]]"></polyvote-item>
           
           <polyvote-e404
@@ -274,7 +291,7 @@
           observer: '_pathChanged'
         },
 
-        mobileTitle: String,
+        itemTitle: String,
 
         year: {
           type: Boolean,
@@ -316,9 +333,23 @@
         });
       },
 
+      _getPageTitle(page, itemTitle, smallScreen) {
+        console.log("pageTitle de app", itemTitle);
+        if (!smallScreen) return 'PolyVote';
+        switch (page) {
+          case 'new': 
+            return 'New Election';
+          case 'list':
+            return 'List Elections';
+          case 'item':
+            return itemTitle;
+          default:
+        }
+      },
+
       /**
-      * When the path changes, this function forces all paths ends with '/'.
-      */
+        * When the path changes, this function forces all paths ends with '/'.
+        */
       _pathChanged(path) {
         if (path && !path.endsWith('/')) {
           this.set('path', path + '/');

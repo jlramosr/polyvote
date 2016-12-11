@@ -149,6 +149,7 @@
               icon="clear"
               class="option__option__icon"
               on-tap="_removeOptionTapped"
+              tabindex="-1"
               index="[[index]]"
               hidden></iron-icon>
             <!-- Lazy-create the tooltip -->
@@ -287,11 +288,6 @@
           value: 'Create new election'
         },
 
-        mobileTitle: {
-          type: String,
-          notify: true
-        },
-
         smallScreen: Boolean,
 
         loadComplete: Boolean,
@@ -311,7 +307,6 @@
 
       ready() {
         this._setEmptyFields();
-        this.mobileTitle = 'New Election';
       },
 
       _computeClassContainer(smallScreen) {

@@ -35,8 +35,6 @@
 
       properties: {
 
-        itemId: String,
-
         routeData: {
           type: Object,
           observer: '_routeChanged'
@@ -45,6 +43,16 @@
         item: {
           type: Object,
           observer: '_itemChanged'
+        },
+
+        itemTitle: {
+          type: String,
+          notify: true
+        },
+
+        smallScreen: { 
+          type: Boolean,
+          observer: '_smallScreenChanged'
         },
 
         loadingDb: Boolean,
@@ -61,6 +69,11 @@
 
       _routeChanged(routeData) {
         this.itemId = routeData.item_id;
+      },
+
+      _smallScreenChanged(smallScreen) {
+        if (this.$$('#itemContainer'))
+          this.$$('#itemContainer').smallScreen = smallScreen;
       },
 
       _itemChanged(item) {
@@ -84,9 +97,11 @@
         }
 
         if (!this._emptyObject(item)) {
+          this.itemTitle = item.title;
           itemContainer = document.createElement(`polyvote-item-${action}`);
           Polymer.dom(this.root).appendChild(itemContainer);
           itemContainer.item = this.item;
+          itemContainer.smallScreen = this.smallScreen;
           itemContainer.loadComplete = this.loadComplete;
           itemContainer.setAttribute('id', 'itemContainer');
           

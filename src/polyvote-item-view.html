@@ -41,8 +41,8 @@
       }
     </style>
 
-    <h1 class="title">{{item.title}}</h1>
-    <div id="itemContainer" class="content--box" hidden>
+    <h1 class="title" hidden$="[[smallScreen]]">[[item.title]]</h1>
+    <div id="itemContainer" class$="content--box [[_computeClassContainer(smallScreen)]]" hidden>
 
       <p id="description" class="description">{{item.description}}</p>
 
@@ -95,8 +95,16 @@
 
       properties: {
         
-        item: Object
+        item: Object,
 
+        smallScreen: Boolean,
+
+      },
+
+      _computeClassContainer(smallScreen) {
+        if (!this.smallScreen) {
+          return 'content--box-desktop';
+        }
       },
 
       render() {
