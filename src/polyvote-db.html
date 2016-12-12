@@ -106,8 +106,33 @@
           });
       },
 
+      /**
+        * Update an item in the database document.
+        *
+        * @param {Object} Parameters to change. If params.vote=true it's a vote.
+        */
       updateItem(params) {
-        console.log("updatetItem", params); 
+        console.log("updatetItem", params);
+        let _document = this.$$('#document'); 
+        if (params.vote) {
+          console.log("It's a vote");
+          const optionIndex = params.index;
+          this.documentData.options[optionIndex].votes = 3;
+          _document.update(_document.path)
+            .then(_ => { 
+              // Success Update (add automatically /itemId to path element)
+              console.log("ITEM UPDATE CORRECT");
+              this.loading = false;
+            })
+            .catch(_ => { 
+              // Failure Save
+              console.log("ITEM UPDATE ERORR");
+              this.loading = false;
+            });
+        }
+        else {
+          console.log("It's a election edition")
+        }
       },
 
       deleteItem(item) {

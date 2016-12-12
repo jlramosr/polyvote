@@ -17,7 +17,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <title>PolyVote</title>
     <meta name="description" content="Voting System">
 
-    <link rel="icon" href="/images/favicon.ico">
+    <link rel="icon" href="/images/_favicon.ico">
 
     <!-- See https://goo.gl/OOhYW5 -->
     <link rel="manifest" href="/manifest.json">
@@ -119,13 +119,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         overflow: visible;
       }
 
-      a {
+      a, a:hover, a:visited, a:active {
         text-decoration: none;
+        color: inherit !important;
       }
+
     </style>
   </head>
 
   <body>
-    <polyvote-app unresolved></polyvote-app>
+    <polyvote-app 
+      unresolved
+      app-title="PolyVote"
+      responsive-width="840px"></polyvote-app>
   </body>
 </html>

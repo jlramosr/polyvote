@@ -48,7 +48,7 @@
 
       <paper-radio-group id="radioGroup" class="radios" selectable="[[_computeSelectable(item.multiple)]]"> 
         <template is="dom-repeat" items="[[item.options]]" as="option" id="optionsTemplate">
-          <paper-radio-button class="radios__row" noink name="{{index}}">
+          <paper-radio-button class="radios__row" noink name="{{index}}" id="option{{index}}">
             <span hidden="[[!item.chars]]">[[_getRadioButtonIndexChar(index)]])</span>
             [[option.title]]
           </paper-radio-button>
@@ -121,20 +121,35 @@
       },
 
       _voteTapped() {
-        this.$.error.setAttribute('hidden');
-        const indexSelected = this.$.radioGroup.selected;
+        this.$.error.setAttribute('hidden','');
+        let indexSelected = this.$.radioGroup.selected;
+        if (indexSelected == 0 && !this.$$('#option0').checked)
+          indexSelected = undefined;
+        console.log(indexSelected);
+        let allValid = false;
+        let titleSelected;
         if (indexSelected !== undefined) {
           const customOptionInput = this.$$('paper-input');
-          let titleSelected;
-          if (indexSelected == 'other') {
-            customOptionInput.setAttribute('required','');
-            titleSelected = customOptionInput.value;
+          if (customOptionInput) {
+            // election with custom option
+            if (indexSelected == 'other') {
+              // custom option selected
+              customOptionInput.setAttribute('required','');
+              titleSelected = customOptionInput.value;
+            }
+            else {
+              // other option selected
+              customOptionInput.removeAttribute('required');
+              titleSelected = this.item.options[indexSelected].title;
+            }
+            allValid = customOptionInput.validate();
           }
           else {
-            customOptionInput.removeAttribute('required');
+            // election without custom option
             titleSelected = this.item.options[indexSelected].title;
+            allValid = true;
           }
-          if (customOptionInput.validate()) {
+          if (allValid) {
             this.fire('vote-item-tapped', {"vote": true,
                                            "index": indexSelected,
                                            "title": titleSelected});

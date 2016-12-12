@@ -40,20 +40,26 @@
         padding: 0;
       }
 
-      .main-content__button {
-      }
-
-      .main-content__button--back {
-      }
-
-      .main-content__button--menu {
-        margin-left: auto;
+      .main-content__toolbar {
       }
 
       .main-content__title {
         @apply(--layout-horizontal);
+        @apply(--layout-center);
+        margin-left: 8px;
         text-transform: uppercase;
-        color: #fff;
+      }
+
+      .main-content__button--left {
+        margin-right: -8px;
+      }
+
+      .main-content__title__icon {
+        margin-right: 8px;
+      }
+
+      .main-content__button--right {
+        margin-left: auto;
       }
 
       .main-content__menu {
@@ -89,7 +95,7 @@
 
       .drawer__title {
         @apply(--layout-horizontal);
-        @apply(--layout-start-justified);
+        @apply(--layout-center);
         padding-left: 8px; /* icon padding + 2px */
         text-transform: uppercase;
       }
@@ -111,7 +117,7 @@
         margin: 0 6px 3px;
       }
 
-      footer {
+      /*footer {
         position: absolute;
         bottom: 0;
         left: 0;
@@ -126,20 +132,20 @@
         color: var(--app-primary-color);
         padding-left: 3px;
         text-decoration: none;
-      }
+      }*/
       
       /* Tablets */
       @media (min-width: 840px) {
         .toolbar {
-          height: 58px;
+          height: 62px;
         }
 
         .main-content {
           padding: var(--app-general-padding) var(--app-general-padding-tablet);
         }
 
-        .main-content__title {
-          padding-left: var(--app-general-padding-tablet);
+        .main-content__toolbar {
+          padding: 0 var(--app-general-padding-tablet);
         }
         
         .main-content__menu__tabs {
@@ -150,15 +156,15 @@
       /* Desktops */
       @media (min-width: 1260px) {
         .toolbar {
-          height: 64px;
+          height: 84px;
         }
 
         .main-content {
           padding: var(--app-general-padding) var(--app-general-padding-desktop);
         }
 
-        .main-content__title {
-          padding-left: var(--app-general-padding-desktop);
+        .main-content__toolbar {
+          padding: 0 var(--app-general-padding-desktop);
         }
 
         .main-content__menu__tabs {
@@ -177,16 +183,19 @@
       data="{{routeData}}"
       tail="{{subroute}}"></app-route>
 
-    <iron-media-query query="max-width: 840px" query-matches="{{smallScreen}}"></iron-media-query>
+    <iron-media-query query="max-width: [[responsiveWidth]]" query-matches="{{smallScreen}}"></iron-media-query>
 
-    <app-drawer-layout fullbleed responsive-width="840px">
+    <app-drawer-layout fullbleed responsive-width="[[responsiveWidth]]">
       <!-- Drawer content -->
       <!-- Lazy-create the drawer for small screen sizes. -->
-      <template is="dom-if" if="[[_shouldRenderDrawer]]">
+      <template is="dom-if" if="[[_shouldRenderSmallScreen]]">
 
         <app-drawer id="drawer" align="right" swipe-open>
           <app-toolbar class="toolbar">
-            <div class="drawer__title">PolyVote</div>
+            <div class="drawer__title">
+              <iron-image src="/images/manifest/icon-24x24.png" class="main-content__title__icon"></iron-image>
+              [[appTitle]]
+            </div>
           </app-toolbar>
           <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer__list" role="navigation">
             <a name="list" href="/list/" class="drawer__list__link">
@@ -202,15 +211,24 @@
       <!-- Main content -->
       <app-header-layout id="headerLayout" class="main-content" flex>
         <app-header condenses reveals fixed>
-          <app-toolbar class="toolbar">
-            <paper-icon-button icon="back" class="main-content__button main-content__button--back" hidden$=[[!smallScreen]]></paper-icon-button>
+          <app-toolbar class="toolbar main-content__toolbar">
+            <paper-icon-button 
+              icon="back" 
+              hidden$="[[_computeBackButtonHidden(smallScreen, backPage)]]"
+              on-tap="_backTapped"
+              class="main-content__button--left"></paper-icon-button>
             <div class="main-content__title" main-title>
+              <template is="dom-if" if="[[_shouldRenderBigScreen]]">
+                <iron-image src="/images/manifest/icon-24x24.png" class="main-content__title__icon"></iron-image>
+              </template>
               [[_getPageTitle(page, itemTitle, smallScreen)]]
             </div>
-            <paper-icon-button icon="menu" class="main-content__button main-content__button--menu" drawer-toggle></paper-icon-button>
+            <paper-icon-button icon="menu" class="main-content__button--right" drawer-toggle></paper-icon-button>
+            <paper-icon-button icon="facebook" class="main-content__button--right" hidden$="[[smallScreen]]"></paper-icon-button>
+            <paper-icon-button icon="twitter" class="main-content__button--right" hidden$="[[smallScreen]]"></paper-icon-button>
           </app-toolbar>
           <!-- Lazy-create the tabs for larger screen sizes. -->
-          <template is="dom-if" if="[[_shouldRenderTabs]]">
+          <template is="dom-if" if="[[_shouldRenderBigScreen]]">
             <div class="main-content__menu">
               <paper-tabs selected="[[pageName]]" class="main-content__menu__tabs" attr-for-selected="name" noink>
                 <paper-tab name="list">
@@ -279,6 +297,13 @@
       is: 'polyvote-app',
 
       properties: {
+        
+        appTitle: String,
+
+        responsiveWidth: {
+          type: String,
+          value: "640px"
+        },
 
         page: {
           type: String,
@@ -286,12 +311,20 @@
           observer: '_pageChanged'
         },
 
+        backPage: {
+          type: String,
+          value: ''
+        },
+
         path: {
           type: String,
           observer: '_pathChanged'
         },
 
-        itemTitle: String,
+        itemTitle: {
+          type: String,
+          value: ''
+        },
 
         year: {
           type: Boolean,
@@ -306,12 +339,12 @@
           value: false
         },
 
-        _shouldRenderDrawer: {
-          computed: '_computeShouldRenderDrawer(smallScreen, loadComplete)'
+        _shouldRenderSmallScreen: {
+          computed: '_computeShouldRenderSmallScreen(smallScreen, loadComplete)'
         },
 
-        _shouldRenderTabs: {
-          computed: '_computeShouldRenderTabs(smallScreen, loadComplete)'
+        _shouldRenderBigScreen: {
+          computed: '_computeShouldRenderBigScreen(smallScreen, loadComplete)'
         }
 
       },
@@ -333,20 +366,6 @@
         });
       },
 
-      _getPageTitle(page, itemTitle, smallScreen) {
-        console.log("pageTitle de app", itemTitle);
-        if (!smallScreen) return 'PolyVote';
-        switch (page) {
-          case 'new': 
-            return 'New Election';
-          case 'list':
-            return 'List Elections';
-          case 'item':
-            return itemTitle;
-          default:
-        }
-      },
-
       /**
         * When the path changes, this function forces all paths ends with '/'.
         */
@@ -355,31 +374,57 @@
           this.set('path', path + '/');
         }
       },
-      
+
+      _getPageTitle(page, itemTitle, smallScreen) {
+        console.log("pageTitle de app", itemTitle);
+        if (!smallScreen) 
+          return this.appTitle;
+        if (page == 'list')
+          return 'Elections';
+        if (page == 'new')
+          return 'New Election';
+        if (page == 'item')
+          return itemTitle;
+        return this.appTitle;
+      },
+
       _routePageChanged(page) {
-        this.page = page || 'list';
+        if (!page) {
+          this.set('route.path', '/list/');
+          return;
+        }
+        this.page = page;
       },
 
       _pageChanged(page, oldPage) {
         if (page != null) {
           // list route is eagerly loaded
           if (page == 'list') {
+            this.backPage = '';
             this._pageLoaded(Boolean(oldPage));
+            return;
           // other routes are lazy loaded
           }
-          else {
-            // Load page import on demand. Show 404 page if fails
-            const resolvedPageUrl = this.resolveUrl(`polyvote-${page}.html`);
-            this.importHref(resolvedPageUrl, this._pageLoaded, this._showPage404, true);
-          }
+          if (page == 'new')
+            this.backPage = '';
+          if (page == 'item')
+            this.backPage = 'list';
+          // Load page import on demand. Show 404 page if fails
+          const resolvedPageUrl = this.resolveUrl(`polyvote-${page}.html`);
+          this.importHref(resolvedPageUrl, this._pageLoaded, this._showPage404, true);
+
         }
+      },
+
+      _backTapped() {
+        this.set('route.path', `/${this.backPage}/`);
       },
 
       _showPage404() {
         this.page = 'e404';
       },
 
-      _pageLoaded(ee,rrr) {
+      _pageLoaded() {
         this._ensureLazyLoaded();
       },
 
@@ -406,7 +451,7 @@
         // Show the snackbar if the user is offline when starting a new session
         // or if the network status changed.
         if (this.offline || (!this.offline && oldOffline === true)) {
-          console.log("ESTAS OFFLINE");
+          console.log("OFFLINE");
           /*if (!this._networkSnackbar) {
             this._networkSnackbar = document.createElement('shop-snackbar');
             Polymer.dom(this.root).appendChild(this._networkSnackbar);
@@ -417,12 +462,16 @@
         }
       },
 
-      _computeShouldRenderDrawer(smallScreen, loadComplete) {
+      _computeShouldRenderSmallScreen(smallScreen, loadComplete) {
         return smallScreen && loadComplete;
       },
 
-      _computeShouldRenderTabs(smallScreen, loadComplete) {
+      _computeShouldRenderBigScreen(smallScreen, loadComplete) {
         return !smallScreen && loadComplete;
+      },
+
+      _computeBackButtonHidden(smallScreen, backPage) {
+        return !smallScreen || !Boolean(backPage);
       }
 
     });
