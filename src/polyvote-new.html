@@ -338,16 +338,14 @@
       _setEmptyFields() {
         // initialize item
         this.item = {
-          "options": []
+          "options": [],
+          "custom": false,
+          "multiple": false,
+          "chars": false
         };
         // add required options to election
         for (let i=0; i < this.optionsRequired; i++)
           this._addOption();
-        // clear all checkboxes
-        const checks = Polymer.dom(this.$.checks).querySelectorAll('paper-checkbox');
-        checks.forEach(check => {
-          check.checked = false;
-        });
       },
 
       /**
@@ -372,8 +370,11 @@
         * @param {String} Id of the new object created.
         */
       _itemIdChanged(itemId) {
-        this.set('route.path', `/item/${itemId}/`);
-        this._setEmptyFields();
+        if (Boolean(itemId)){
+          this.set('route.path', `/item/${itemId}/`);
+          this._setEmptyFields();
+          this.itemId = null;
+        }
       },
 
       _saveTapped() {
@@ -444,7 +445,6 @@
           }
         }
       },
-
 
       /**
         * Add an option of item list options.

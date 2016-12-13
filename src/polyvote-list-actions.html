@@ -56,10 +56,6 @@
       horizontal-align="left"
       vertical-align="top">
       <div class="dialog__actions">
-        <div class="dialog__row dialog__row--first-child" on-tap="_viewInfoItemTapped">
-          <iron-icon class="dialog__icon" icon="info"></iron-icon>
-          Info
-        </div>
         <div class="dialog__row" on-tap="_viewVoteItemTapped">
           <iron-icon class="dialog__icon" icon="checks"></iron-icon>
           Vote
@@ -116,12 +112,12 @@
     },
 
     _updatePositions() {
-      if ((window.innerWidth - this.positionTargetX) < 180) // Show on the Left
+      if ((window.innerWidth - this.positionTargetX) < 180) // Show on the left
         this.$.dialog.horizontalOffset = -90; // lower, more to the left
       else // Show on the Right
         this.$.dialog.horizontalOffset = 10; // higher, more to the right
-      if ((window.innerHeight - this.positionTargetY) < 200) // Show Up
-        this.$.dialog.verticalOffset = -150;  // lower, more to up
+      if ((window.innerHeight - this.positionTargetY) < 160) // Show Up (40*numOptions)
+        this.$.dialog.verticalOffset = -120;  // lower, more to up (30*numOptions)
       else // Show Down
         this.$.dialog.verticalOffset = 2; // higher, more to down
     },
@@ -131,11 +127,6 @@
         this._updatePositions();
       }
       this.$.dialog.opened = value;
-    },
-
-    _viewInfoItemTapped(event) {
-      this.$.dialog.opened = false;
-      this.fire('view-info-item-tapped', this.item);
     },
 
     _viewVoteItemTapped(event) {

@@ -136,14 +136,10 @@
     },
 
     listeners: {
-      'view-info-item-tapped': '_viewInfoItem',
       'view-vote-item-tapped': '_viewVoteItem',
       'view-edit-item-tapped': '_viewEditItem',
       'view-results-item-tapped': '_viewResultsItem',
       'delete-item-tapped': '_deleteItem'
-    },
-
-    ready() {
     },
 
     _computeItemClass(index) {
@@ -180,30 +176,29 @@
     _viewNewItemTapped() {
       this.set('route.path', `/new`);
     },
-    
-    _viewInfoItem(event) {
-      const item = event.detail;
-      //MOSTRAR DIALOGO
-    },
 
     _viewVoteItem(event) {
-      const item = event.detail;
-      this.set('route.path', `/item/${item.id}/view`);
+      const itemId = event.detail.$key;
+      this.set('route.path', `/item/${itemId}/view`);
     },
 
     _viewEditItem(event) {
-      const item = event.detail;
-      this.set('route.path', `/item/${item.id}/edit`);
+      const itemId = event.detail.$key;
+      this.set('route.path', `/item/${itemId}/edit`);
     },
 
     _viewResultsItem(event) {
-      const item = event.detail;
-      this.set('route.path', `/item/${item.id}/results`);
+      const itemId = event.detail.$key;
+      this.set('route.path', `/item/${itemId}/results`);
     },
 
     _deleteItem(event) {
-      const item = event.detail;
-      this.$.db.deleteItem({"id": item.id});
+      const itemId = event.detail.$key;
+      this.$.db.document = true;
+      this.$.db.itemId = itemId;
+      this.$.db.deleteItem();
+      this.$.db.itemId = null;
+      this.$.db.document = false;
       this.set('route.path', `/list`);
     }
 

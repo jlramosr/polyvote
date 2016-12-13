@@ -27,6 +27,10 @@
         height: 100vh;
       }
 
+      app-header {
+        
+      }
+
       .toolbar {
         @apply(--layout-horizontal);
         vertical-align: center;
@@ -36,41 +40,52 @@
         height: 46px;
       }
 
-      .main-content {
+      .main {
         padding: 0;
       }
 
-      .main-content__toolbar {
+      .main__toolbar {
       }
 
-      .main-content__title {
+      .main__title-content {
+        margin-left: 8px;
+        overflow: hidden;
+      }
+
+      .main__title-content__title {
         @apply(--layout-horizontal);
         @apply(--layout-center);
-        margin-left: 8px;
         text-transform: uppercase;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
-      .main-content__button--left {
+      .main__button {
+        min-width: 40px;
+      }
+
+      .main__button--position-left {
         margin-right: -8px;
       }
 
-      .main-content__title__icon {
+      .main__title__icon {
         margin-right: 8px;
       }
 
-      .main-content__button--right {
+      .main__button--position-right {
         margin-left: auto;
       }
 
-      .main-content__menu {
+      .main__menu {
         display: block;
         width: 100%;
-        height: 36px;
+        height: 28px;
         background: var(--app-primary-color-soft);
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
       }
 
-      .main-content__menu__tabs {
+      .main__menu__tabs {
         @apply(--layout-horizontal);
         @apply(--layout-around-justified); 
         --paper-tabs-selection-bar-color: #000;
@@ -80,14 +95,14 @@
         font-size: 12px;
       }
 
-      .main-content__menu__tab__link {
+      .main__menu__tab__link {
         @apply(--layout-horizontal);
         @apply(--layout-center-center);
         text-decoration: none;
         color: #000;
       }
 
-      .main-content__menu__tab__icon {
+      .main__menu__tab__icon {
         margin-right: 2px;
         height: 16px;
         weight: 16px;
@@ -140,15 +155,15 @@
           height: 62px;
         }
 
-        .main-content {
+        .main {
           padding: var(--app-general-padding) var(--app-general-padding-tablet);
         }
 
-        .main-content__toolbar {
+        .main__toolbar {
           padding: 0 var(--app-general-padding-tablet);
         }
         
-        .main-content__menu__tabs {
+        .main__menu__tabs {
           margin: 0 var(--app-general-padding-tablet);
         }
       }
@@ -159,15 +174,15 @@
           height: 84px;
         }
 
-        .main-content {
+        .main {
           padding: var(--app-general-padding) var(--app-general-padding-desktop);
         }
 
-        .main-content__toolbar {
+        .main__toolbar {
           padding: 0 var(--app-general-padding-desktop);
         }
 
-        .main-content__menu__tabs {
+        .main__menu__tabs {
           margin: 0 var(--app-general-padding-desktop);
         }
       }
@@ -193,7 +208,7 @@
         <app-drawer id="drawer" align="right" swipe-open>
           <app-toolbar class="toolbar">
             <div class="drawer__title">
-              <iron-image src="/images/manifest/icon-24x24.png" class="main-content__title__icon"></iron-image>
+              <iron-image src="/images/manifest/icon-24x24.png" class="main__title__icon"></iron-image>
               [[appTitle]]
             </div>
           </app-toolbar>
@@ -209,36 +224,40 @@
       </template>
 
       <!-- Main content -->
-      <app-header-layout id="headerLayout" class="main-content" flex>
-        <app-header condenses reveals fixed>
-          <app-toolbar class="toolbar main-content__toolbar">
+      <app-header-layout id="headerLayout" class="main" flex>
+        <app-header fixed>
+          <app-toolbar class="toolbar main__toolbar">
             <paper-icon-button 
               icon="back" 
               hidden$="[[_computeBackButtonHidden(smallScreen, backPage)]]"
               on-tap="_backTapped"
-              class="main-content__button--left"></paper-icon-button>
-            <div class="main-content__title" main-title>
-              <template is="dom-if" if="[[_shouldRenderBigScreen]]">
-                <iron-image src="/images/manifest/icon-24x24.png" class="main-content__title__icon"></iron-image>
-              </template>
-              [[_getPageTitle(page, itemTitle, smallScreen)]]
+              class="main__button main__button--position-left"></paper-icon-button>
+            <div class="main__title-content">
+              <div class="main__title-content__title" main-title>
+                <template is="dom-if" if="[[_shouldRenderBigScreen]]">
+                  <iron-image src="/images/manifest/icon-24x24.png" class="main__title__icon"></iron-image>
+                </template>
+                [[_getPageTitle(page, itemTitle, smallScreen)]]
+              </div>
             </div>
-            <paper-icon-button icon="menu" class="main-content__button--right" drawer-toggle></paper-icon-button>
-            <paper-icon-button icon="facebook" class="main-content__button--right" hidden$="[[smallScreen]]"></paper-icon-button>
-            <paper-icon-button icon="twitter" class="main-content__button--right" hidden$="[[smallScreen]]"></paper-icon-button>
+            <div class="main__button--position-right">
+              <paper-icon-button icon="menu" class="main__button" drawer-toggle></paper-icon-button>
+              <paper-icon-button icon="facebook" class="main__button" hidden$="[[smallScreen]]"></paper-icon-button>
+              <paper-icon-button icon="twitter" class="main__button" hidden$="[[smallScreen]]"></paper-icon-button>
+            </div>
           </app-toolbar>
           <!-- Lazy-create the tabs for larger screen sizes. -->
           <template is="dom-if" if="[[_shouldRenderBigScreen]]">
-            <div class="main-content__menu">
-              <paper-tabs selected="[[pageName]]" class="main-content__menu__tabs" attr-for-selected="name" noink>
+            <div class="main__menu">
+              <paper-tabs selected="[[pageName]]" class="main__menu__tabs" attr-for-selected="name" noink>
                 <paper-tab name="list">
-                  <a href="/list/" class="main-content__menu__tab__link">
-                    <iron-icon icon="list" class="main-content__menu__tab__icon"></iron-icon>Election List
+                  <a href="/list/" class="main__menu__tab__link">
+                    <iron-icon icon="list" class="main__menu__tab__icon"></iron-icon>Election List
                   </a>
                 </paper-tab>
                 <paper-tab name="new">
-                  <a href="/new/" class="main-content__menu__tab__link">
-                    <iron-icon icon="new" class="main-content__menu__tab__icon"></iron-icon>New Election
+                  <a href="/new/" class="main__menu__tab__link">
+                    <iron-icon icon="new" class="main__menu__tab__icon"></iron-icon>New Election
                   </a>
                 </paper-tab>
               </paper-tabs>
@@ -376,7 +395,6 @@
       },
 
       _getPageTitle(page, itemTitle, smallScreen) {
-        console.log("pageTitle de app", itemTitle);
         if (!smallScreen) 
           return this.appTitle;
         if (page == 'list')

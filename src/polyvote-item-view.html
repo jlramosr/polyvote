@@ -125,39 +125,68 @@
         let indexSelected = this.$.radioGroup.selected;
         if (indexSelected == 0 && !this.$$('#option0').checked)
           indexSelected = undefined;
-        console.log(indexSelected);
         let allValid = false;
         let titleSelected;
         if (indexSelected !== undefined) {
+          let option;
           const customOptionInput = this.$$('paper-input');
           if (customOptionInput) {
             // election with custom option
             if (indexSelected == 'other') {
               // custom option selected
               customOptionInput.setAttribute('required','');
-              titleSelected = customOptionInput.value;
+              titleSelected = customOptionInput.value.trim();
+              if (Boolean(titleSelected)) {
+                // custom option is not empty
+                if (!this._optionExists(titleSelected)) {
+                  // custom option doesn't exist
+                  allValid = true;
+                  this.push('item.options', {"title": titleSelected, "votes": 1, "custom": true});
+                }
+                else {
+                  // custom option exists
+                  customOptionInput.errorMessage = 'This option already exists!';
+                  customOptionInput.invalid = true;
+                }
+              }
+              else {
+                // custom option is empty
+                customOptionInput.errorMessage = "If it's checked, it can't be empty";
+                customOptionInput.validate();
+              }
             }
             else {
               // other option selected
+              option = this.item.options[indexSelected];
               customOptionInput.removeAttribute('required');
-              titleSelected = this.item.options[indexSelected].title;
+              titleSelected = option.title;
+              option.votes += 1;
+              allValid = true;
             }
-            allValid = customOptionInput.validate();
           }
           else {
             // election without custom option
-            titleSelected = this.item.options[indexSelected].title;
+            option = this.item.options[indexSelected];
+            titleSelected = option.title;
+            option.votes += 1;
             allValid = true;
           }
           if (allValid) {
-            this.fire('vote-item-tapped', {"vote": true,
-                                           "index": indexSelected,
-                                           "title": titleSelected});
+            this.fire('vote-item-tapped', this.item);
           }
         }
         else {
           this.$.error.removeAttribute('hidden');
         }
+      },
+
+      _optionExists(title) {
+        for (let index in this.item.options) {
+          if (this.item.options[index].title.trim() == title.trim()) {
+            return true;
+          }
+        }
+        return false;
       },
 
       _viewEditTapped() {

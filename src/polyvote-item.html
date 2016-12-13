@@ -40,10 +40,7 @@
           observer: '_routeChanged'
         },
 
-        item: {
-          type: Object,
-          observer: '_itemChanged'
-        },
+        item: Object,
 
         itemTitle: {
           type: String,
@@ -67,6 +64,10 @@
         'view-results-item-tapped': '_viewResultsItem'
       },
 
+      observers: [
+        '_itemChanged(item, routeData.action)'
+      ],
+
       _routeChanged(routeData) {
         this.itemId = routeData.item_id;
       },
@@ -76,9 +77,8 @@
           this.$$('#itemContainer').smallScreen = smallScreen;
       },
 
-      _itemChanged(item) {
+      _itemChanged(item, action) {
         const itemId = this.routeData.item_id;
-        const action = this.routeData.action;
         
         //Put default action if it is not in url
         if (!action) {

@@ -5,7 +5,7 @@
 <dom-module id="polyvote-db">
   <template>
 
-    <template is="dom-if" if="[[document]]">
+    <template is="dom-if" if="[[document]]" id="documentTemplate">
       <firebase-document
         id="document"
         app-name="polyvote"
@@ -41,7 +41,8 @@
           */
         document: {
           type: Boolean,
-          value: false
+          value: false,
+          observer: '_documentQueryChanged'
         },
 
         /**
@@ -80,8 +81,10 @@
 
       },
 
-      getItem(id) {
-        console.log("getItem", id);
+      _documentQueryChanged(_document) {
+        if (_document) {
+          this.$.documentTemplate.render();
+        }
       },
 
       /**
@@ -93,7 +96,7 @@
         this.loading = true;
         let _document = this.$$('#document');
         this.documentData = item;
-        _document.save(_document.path)
+        _document.save(_document.path) //second parameter null generates random id
           .then(_ => { 
             // Success Save (add automatically /itemId to path element)
             this.itemId = _document.path.split('/')[2];
@@ -109,34 +112,43 @@
       /**
         * Update an item in the database document.
         *
-        * @param {Object} Parameters to change. If params.vote=true it's a vote.
+        * @param {Object} Complete item to change.
         */
-      updateItem(params) {
-        console.log("updatetItem", params);
+      updateItem(item) {
+        this.loading = true;
         let _document = this.$$('#document'); 
-        if (params.vote) {
-          console.log("It's a vote");
-          const optionIndex = params.index;
-          this.documentData.options[optionIndex].votes = 3;
-          _document.update(_document.path)
-            .then(_ => { 
-              // Success Update (add automatically /itemId to path element)
-              console.log("ITEM UPDATE CORRECT");
-              this.loading = false;
-            })
-            .catch(_ => { 
-              // Failure Save
-              console.log("ITEM UPDATE ERORR");
-              this.loading = false;
-            });
-        }
-        else {
-          console.log("It's a election edition")
-        }
+        this.documentData = item;
+        _document.save(this.collection, this.itemId)
+          .then(_ => { 
+            // Success Update
+            this.loading = false;
+          })
+          .catch(_ => { 
+            // Failure Save
+            console.log("ITEM UPDATE ERORR");
+            this.loading = false;
+          });
       },
 
-      deleteItem(item) {
-        console.log("deleteItem", item); 
+      /**
+        * Delete an item in the database document.
+        *
+        * @param {Object} Object with the id item (i.e. {"id": -K59asd8}).
+        */
+      deleteItem() {
+        this.loading = true;
+        let _document = this.$$('#document');
+        this.documentData = null;
+        _document.save(this.collection, this.itemId)
+          .then(_ => { 
+            // Success Delete
+            this.loading = false;
+          })
+          .catch(_ => { 
+            // Failure Delete
+            console.log("ITEM DELETE ERORR");
+            this.loading = false;
+          });
       }
       
     });

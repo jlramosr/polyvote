@@ -76,7 +76,7 @@
         </div>
       </template>
 
-      <p class="total">[[item.numVotes]] votes</p>
+      <p class="total">[[numVotesTotal]] [[_computeStringVotes(numVotesTotal)]]</p>
 
     </div>
     
@@ -98,6 +98,16 @@
 
         smallScreen: Boolean,
 
+        numVotesTotal: {
+          type: Number,
+          computed: '_computenumVotesTotal(item)'
+        }
+
+      },
+
+      render() {
+        this.$.optionsTemplate.render();
+        this.$.resultsContainer.removeAttribute('hidden');
       },
 
       _computeClassContainer(smallScreen) {
@@ -106,25 +116,39 @@
         }
       },
 
-      render() {
-        this.$.optionsTemplate.render();
-        this.$.resultsContainer.removeAttribute('hidden');
-      },
-
       _computeSliderRowBackground(index) {
         if (index % 2) 
           return 'slider__row--soft';
         return 'slider__row--strong';
       },
+      
+      _computenumVotesTotal(item) {
+        let numVotesTotal = 0;
+        this.item.options.forEach(option => {
+          numVotesTotal += option.votes;
+        });
+        return numVotesTotal;
+      },
 
       _computeValueSlider(index) {
-        return (this.item.options[index].votes * 100 / this.item.numVotes).toFixed(2);
+        return (this.item.options[index].votes * 100 / this.numVotesTotal).toFixed(2);
+      },
+
+      _computeStringVotes(numVotesTotal) {
+        if (numVotesTotal == 1) 
+          return 'vote';
+        return 'votes';
       },
 
       _computeTotalText(index) {
         const votes = this.item.options[index].votes;
-        const percent = (votes * 100 / this.item.numVotes).toFixed(2);
-        return `${percent}% (${votes} votes)`
+        let percent = 0;
+        if (this.numVotesTotal)
+          percent = (votes * 100 / this.numVotesTotal).toFixed(2);
+        let votesString = 'votes';
+        if (votes == 1)
+          votesString = 'vote';
+        return `${percent}% (${votes} ${votesString})`
       }
 
     });
