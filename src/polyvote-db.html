@@ -63,7 +63,8 @@
           */
         documentData: {
           type: Object,
-          notify: true
+          notify: true,
+          observer: '_dataChanged'
         },
 
         /**
@@ -71,12 +72,13 @@
           */
         data: {
           type: Object,
-          notify: true
+          notify: true,
         },
           
         loading: { 
           type: Boolean,
-          notify: true
+          notify: true,
+          value: false
         }
 
       },
@@ -86,6 +88,13 @@
           this.$.documentTemplate.render();
         }
       },
+
+      _dataChanged(data, oldData) {
+        if (oldData && data.title) {
+          this.loading = false;
+        }
+      },
+
 
       /**
         * Add a new item in the database document.

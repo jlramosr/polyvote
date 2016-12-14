@@ -23,31 +23,7 @@
     <polyvote-db document id="db" document-data="{{item}}" collection="elections" item-id="{{itemId}}" loading="{{loadingDb}}"></polyvote-db>
     <paper-spinner class="spinner" active="[[loadingDb]]"></paper-spinner>
 
-    <div id="itemContainer">
-      <template is="dom-if" if="[[_shouldRenderView(action)]]">
-        <polyvote-item-view
-          id="viewItem"
-          item="{{item}}"
-          small-screen="{{smallScreen}}"
-          load-complete="{{loadComplete}}"></polyvote-item-view>
-      </template>
 
-      <template is="dom-if" if="[[_shouldRenderEdit(action)]]">
-        <polyvote-item-edit
-          id="editItem"
-          item="{{item}}"
-          small-screen="{{smallScreen}}"
-          load-complete="{{loadComplete}}"></polyvote-item-edit>
-      </template>
-
-      <template is="dom-if" if="[[_shouldRenderResults(action)]]">
-        <polyvote-item-results
-          id="resultsItem"
-          item="{{item}}"
-          small-screen="{{smallScreen}}"
-          load-complete="{{loadComplete}}"></polyvote-item-results>
-      </template>
-    </div>
 
   </template>
 </dom-module>
@@ -89,7 +65,10 @@
           notify: true
         },
 
-        smallScreen: Boolean,
+        smallScreen: { 
+          type: Boolean,
+          observer: '_smallScreenChanged'
+        },
 
         loadingDb: Boolean,
 
@@ -112,16 +91,9 @@
         this.action = routeData.action || '';
       },
 
-      _shouldRenderView(action) {
-        return action === 'view';
-      },
-
-      _shouldRenderEdit(action) {
-        return action === 'edit';
-      },
-
-      _shouldRenderResults(action) {
-        return action === 'results';
+      _smallScreenChanged(smallScreen) {
+        if (this.$$('#itemContainer'))
+          this.$$('#itemContainer').smallScreen = smallScreen;
       },
 
       _itemActionChanged(item, itemId, action) {
@@ -130,20 +102,55 @@
           this.set('oldRoute.path', '/list/');
           return;
         }
+        
         // put default action if it is not in url
         if (!Boolean(action)) {
           this.set('routeData.action', 'view');
           return;
         }
 
-        if (action == 'view') {
-          this.backPage = 'home/';
+        /*
+          console.log("routeData",routeData, "item", item);
+          POR AQUI PASA 4 VECES (mirar pathChanged de polyvote-app)
+        */
+
+        let itemContainer = this.$$('#itemContainer');
+        if (itemContainer) {
+          Polymer.dom(this.root).removeChild(itemContainer);
+          itemContainer = null;
         }
-        if (action == 'edit') {
-          this.backPage = `item/${itemId}/`;
+        
+        if (!this._emptyObject(item)) {
+          this.itemTitle = item.title;
+          itemContainer = document.createElement(`polyvote-item-${action}`);
+          Polymer.dom(this.root).appendChild(itemContainer);
+          itemContainer.item = this.item;
+          itemContainer.smallScreen = this.smallScreen;
+          itemContainer.loadComplete = this.loadComplete;
+          itemContainer.setAttribute('id', 'itemContainer');
+          
+          const resolvedPageUrl = this.resolveUrl(`polyvote-item-${action}.html`);
+          this.importHref(
+            resolvedPageUrl, 
+            _ => {
+              if (itemContainer.render) {
+                itemContainer.render();   
+              }
+              if (action == 'results')
+                this.backPage = `item/${itemId}/`;
+              else
+                this.backPage = 'home/';
+            },
+            _ => {
+              const message = `${this._capitalizeFirstLetter(this.itemName)} action not defined`;
+              this.fire('show-error-page', {"message": message});
+            },
+            true
+          );
         }
-        if (action == 'results'){
-          this.backPage = `item/${itemId}/`;
+        else {
+          /*const message = `${this._capitalizeFirstLetter(this.itemName)} not found`;
+          this.fire('show-error-page', {"message": message});*/
         }
       },
 

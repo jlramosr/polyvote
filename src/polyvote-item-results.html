@@ -59,7 +59,7 @@
     </style>
     
     <h1 class="title" hidden$="[[smallScreen]]">[[item.title]] Results</h1>
-    <div id="resultsContainer" class$="content--box [[_computeClassContainer(smallScreen)]]" hidden>
+    <div id="resultsContainer" class$="content--box [[_computeClassContainer(smallScreen)]]">
 
       <p id="description" class="description">[[item.description]]</p>
 
@@ -124,9 +124,10 @@
       
       _computenumVotesTotal(item) {
         let numVotesTotal = 0;
-        this.item.options.forEach(option => {
-          numVotesTotal += option.votes;
-        });
+        if (this.item)
+          this.item.options.forEach(option => {
+            numVotesTotal += option.votes;
+          });
         return numVotesTotal;
       },
 
