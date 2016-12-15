@@ -393,26 +393,42 @@
       },
 
       /**
+        * Show the title page on the header
+        */
+
+      _getPageTitle(page, itemTitle, smallScreen) {
+        if (!smallScreen) {
+          return this.appTitle;
+        }
+        if (page == 'list') {
+          return 'Elections';
+        }
+        if (page == 'new') {
+          return 'New Election';
+        }
+        if (page == 'item') {
+          return itemTitle;
+        }
+        if (page == 'e404') {
+          return '404 ERROR';
+        }
+        return this.appTitle;
+      },
+
+      /**
+        * Fired when user wants to redirect to back page.
+        */
+      _backTapped() {
+        this.set('route.path', `/${this.backPage}/`);
+      },
+
+      /**
         * When the path changes, this function forces all paths ends with '/'.
         */
       _pathChanged(path) {
         if (path && !path.endsWith('/')) {
           this.set('path', path + '/');
         }
-      },
-
-      _getPageTitle(page, itemTitle, smallScreen) {
-        if (!smallScreen) 
-          return this.appTitle;
-        if (page == 'list')
-          return 'Elections';
-        if (page == 'new')
-          return 'New Election';
-        if (page == 'item')
-          return itemTitle;
-        if (page == 'e404')
-          return '404 ERROR';
-        return this.appTitle;
       },
 
       _routePageChanged(page) {
@@ -432,28 +448,21 @@
             return;
           }
           // other routes are lazy loaded
-          if (page == 'new')
-             this.backPage = '';
-          if (page == 'e404')
-             this.backPage = 'home';
+          if (page == 'new') {
+            this.backPage = '';
+          }
+          if (page == 'e404') {
+            this.backPage = 'home';
+          }
           // page == 'item' is handled by own element
           // Load page import on demand. Show 404 page if fails
           const resolvedPageUrl = this.resolveUrl(`polyvote-${page}.html`);
-          this.importHref(
-            resolvedPageUrl,
-            this._pageLoaded,
-            _ => {
-              this.fire('show-error-page', {
-                "message": 'Page not found'
-              })
-            },
-            true
-          );
+          this.importHref(resolvedPageUrl, this._pageLoaded, this._pageErrorLoaded, true);
         }
       },
 
-      _backTapped() {
-        this.set('route.path', `/${this.backPage}/`);
+      _pageErrorLoaded() {
+        this.fire('show-error-page', 'Page not found');
       },
 
       _pageLoaded() {
@@ -495,7 +504,7 @@
       },
 
       _showPage404(event) {
-        this.$$('polyvote-e404').message = event.detail.message;
+        this.$$('polyvote-e404').message = event.detail;
         this.page = 'e404';
       },
 

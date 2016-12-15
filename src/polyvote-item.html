@@ -1,8 +1,12 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 
 <link rel="import" href="polyvote-db.html">
+<link rel="import" href="polyvote-item-view.html"/>
+<link rel="import" href="polyvote-item-edit.html"/>
+<link rel="import" href="polyvote-item-results.html"/>
 
 <link rel="import" href="shared-styles.html">
 
@@ -23,30 +27,36 @@
     <polyvote-db document id="db" document-data="{{item}}" collection="elections" item-id="{{itemId}}" loading="{{loadingDb}}"></polyvote-db>
     <paper-spinner class="spinner" active="[[loadingDb]]"></paper-spinner>
 
-    <div id="itemContainer">
-      <template is="dom-if" if="[[_shouldRenderView(action)]]">
+    <h1 class="title" hidden$="[[smallScreen]]">[[item.title]]</h1>
+
+    <div id="itemContainer" class$="content--box [[_computeClassContainer(smallScreen)]]">
+
+      <iron-pages
+        selected="[[action]]"
+        attr-for-selected="name"
+        fallback-selection="e404"
+        role="main">
+
         <polyvote-item-view
-          id="viewItem"
+          name="view"
           item="{{item}}"
           small-screen="{{smallScreen}}"
           load-complete="{{loadComplete}}"></polyvote-item-view>
-      </template>
 
-      <template is="dom-if" if="[[_shouldRenderEdit(action)]]">
-        <polyvote-item-edit
-          id="editItem"
+        <polyvote-item-view
+          name="edit"
           item="{{item}}"
           small-screen="{{smallScreen}}"
-          load-complete="{{loadComplete}}"></polyvote-item-edit>
-      </template>
+          load-complete="{{loadComplete}}"></polyvote-item-view>
 
-      <template is="dom-if" if="[[_shouldRenderResults(action)]]">
         <polyvote-item-results
-          id="resultsItem"
+          name="results"
           item="{{item}}"
           small-screen="{{smallScreen}}"
           load-complete="{{loadComplete}}"></polyvote-item-results>
-      </template>
+            
+      </iron-pages>
+
     </div>
 
   </template>
@@ -65,6 +75,11 @@
         routeData: {
           type: Object,
           observer: '_routeChanged'
+        },
+
+        action: {
+          type: String,
+          reflectToAttribute: true
         },
 
         oldRoute: {
@@ -93,8 +108,8 @@
 
         loadingDb: Boolean,
 
-        loadComplete: Boolean
-
+        loadComplete: Boolean,
+        
       },
 
       listeners: {
@@ -112,38 +127,53 @@
         this.action = routeData.action || '';
       },
 
-      _shouldRenderView(action) {
-        return action === 'view';
-      },
-
-      _shouldRenderEdit(action) {
-        return action === 'edit';
-      },
-
-      _shouldRenderResults(action) {
-        return action === 'results';
+      _computeClassContainer(smallScreen) {
+        if (!this.smallScreen) {
+          return 'content--box-desktop';
+        }
       },
 
       _itemActionChanged(item, itemId, action) {
-        // if there is no itemId, show the list of all items
-        if (!Boolean(itemId)) {
-          this.set('oldRoute.path', '/list/');
-          return;
-        }
-        // put default action if it is not in url
-        if (!Boolean(action)) {
-          this.set('routeData.action', 'view');
-          return;
-        }
+        console.log("_itemActionChanged", item, itemId, action);
+        if (action != null) {
+          // if there is no itemId, show the list of all items
+          if (!Boolean(itemId)) {
+            this.set('oldRoute.path', '/list/');
+            return;
+          }
+          // put default action if it is not in url
+          if (!Boolean(action)) {
+            this.set('routeData.action', 'view');
+            return;
+          }
 
-        if (action == 'view') {
+          if (item) {
+            const resolvedActionUrl = this.resolveUrl(`polyvote-item-${action}.html`);
+            this.importHref(resolvedActionUrl, this._actionLoaded, this._actionErrorLoaded, true);
+          }
+          else {
+            this._itemErrorLoaded();
+          }
+        }
+      },
+
+      _itemErrorLoaded() {
+        console.log('_itemErrorLoaded');
+        this.fire('show-error-page', `${this._capitalizeFirstLetter(this.itemName)} not found`);
+      },
+
+      _actionErrorLoaded() {
+        console.log('_actionErrorLoaded');
+        this.fire('show-error-page', `${this._capitalizeFirstLetter(this.itemName)} action not defined`);
+      },
+
+      _actionLoaded() {
+        this.itemTitle = this.item.title;
+        if (this.action == 'results') {
+          this.backPage = `item/${this.itemId}/`;
+        }
+        else {
           this.backPage = 'home/';
-        }
-        if (action == 'edit') {
-          this.backPage = `item/${itemId}/`;
-        }
-        if (action == 'results'){
-          this.backPage = `item/${itemId}/`;
         }
       },
 

@@ -41,41 +41,36 @@
       }
     </style>
 
-    <h1 class="title" hidden$="[[smallScreen]]">[[item.title]]</h1>
-    <div id="itemContainer" class$="content--box [[_computeClassContainer(smallScreen)]]">
+    <p id="description" class="description">{{item.description}}</p>
 
-      <p id="description" class="description">{{item.description}}</p>
+    <paper-radio-group id="radioGroup" class="radios" selectable="[[_computeSelectable(item.multiple)]]"> 
+      <template is="dom-repeat" items="[[item.options]]" as="option" id="optionsTemplate">
+        <paper-radio-button class="radios__row" noink name="{{index}}" id="option{{index}}">
+          <span hidden="[[!item.chars]]">[[_getRadioButtonIndexChar(index)]])</span>
+          [[option.title]]
+        </paper-radio-button>
+      </template>
+      <template is="dom-if" if="[[item.custom]]" id="customOptionTemplate">
+        <paper-radio-button class="radios__row" noink name="other">
+          <span class="radios__row__section--custom" hidden="[[!item.chars]]">
+            [[_getRadioButtonIndexChar(item.options.length)]])
+          </span>
+          <paper-input
+            class="radios__row__section--custom input"
+            label="Other"
+            required
+            error-message="If it's checked, it can't be empty"
+            no-label-float>
+          </paper-input>
+        </paper-radio-button>
+      </template>
+    </paper-radio-group>
 
-      <paper-radio-group id="radioGroup" class="radios" selectable="[[_computeSelectable(item.multiple)]]"> 
-        <template is="dom-repeat" items="[[item.options]]" as="option" id="optionsTemplate">
-          <paper-radio-button class="radios__row" noink name="{{index}}" id="option{{index}}">
-            <span hidden="[[!item.chars]]">[[_getRadioButtonIndexChar(index)]])</span>
-            [[option.title]]
-          </paper-radio-button>
-        </template>
-        <template is="dom-if" if="[[item.custom]]" id="customOptionTemplate">
-          <paper-radio-button class="radios__row" noink name="other">
-            <span class="radios__row__section--custom" hidden="[[!item.chars]]">
-              [[_getRadioButtonIndexChar(item.options.length)]])
-            </span>
-            <paper-input
-              class="radios__row__section--custom input"
-              label="Other"
-              required
-              error-message="If it's checked, it can't be empty"
-              no-label-float>
-            </paper-input>
-          </paper-radio-button>
-        </template>
-      </paper-radio-group>
-
-      <div class="buttons">
-        <paper-button class="buttons__button" on-tap="_voteTapped">Vote</paper-button>
-      </div>
-
-      <span id="error" class="error" hidden>You have at least one option selected</span>
-
+    <div class="buttons">
+      <paper-button class="buttons__button" on-tap="_voteTapped">Vote</paper-button>
     </div>
+
+    <span id="error" class="error" hidden>You have at least one option selected</span>
 
     <div class="fabs">
       <paper-fab class="fabs__fab" icon="edit" on-tap="_viewEditTapped"></paper-fab>

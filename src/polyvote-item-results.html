@@ -58,27 +58,23 @@
       }
     </style>
     
-    <h1 class="title" hidden$="[[smallScreen]]">[[item.title]] Results</h1>
-    <div id="resultsContainer" class$="content--box [[_computeClassContainer(smallScreen)]]">
+    <p id="description" class="description">[[item.description]]</p>
 
-      <p id="description" class="description">[[item.description]]</p>
+    <template is="dom-repeat" items="[[item.options]]" as="option" id="optionsTemplate">
+      <div class$="slider__row [[_computeSliderRowBackground(index)]]">
+        <span class="slider__title">[[option.title]]</span>
+        <paper-slider 
+          class="slider__line"
+          disabled
+          min="0"
+          max="100"
+          value="[[_computeValueSlider(index)]]"></paper-slider>
+        <span class="slider__total">[[_computeTotalText(index)]]</span>
+      </div>
+    </template>
 
-      <template is="dom-repeat" items="[[item.options]]" as="option" id="optionsTemplate">
-        <div class$="slider__row [[_computeSliderRowBackground(index)]]">
-          <span class="slider__title">[[option.title]]</span>
-          <paper-slider 
-            class="slider__line"
-            disabled
-            min="0"
-            max="100"
-            value="[[_computeValueSlider(index)]]"></paper-slider>
-          <span class="slider__total">[[_computeTotalText(index)]]</span>
-        </div>
-      </template>
+    <p class="total">[[numVotesTotal]] [[_computeStringVotes(numVotesTotal)]]</p>
 
-      <p class="total">[[numVotesTotal]] [[_computeStringVotes(numVotesTotal)]]</p>
-
-    </div>
     
   </template>
 
@@ -108,12 +104,6 @@
       render() {
         this.$.optionsTemplate.render();
         this.$.resultsContainer.removeAttribute('hidden');
-      },
-
-      _computeClassContainer(smallScreen) {
-        if (!this.smallScreen) {
-          return 'content--box-desktop';
-        }
       },
 
       _computeSliderRowBackground(index) {
