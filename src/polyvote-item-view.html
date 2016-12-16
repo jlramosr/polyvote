@@ -105,13 +105,12 @@
       render() {
         this.$.optionsTemplate.render();
         this.$.customOptionTemplate.render();
-        this.$.itemContainer.removeAttribute('hidden');
       },
 
       _computeSelectable(multiple) {
         if (multiple) {
           return 'none';
-        } 
+        }
         return 'paper-radio-button';
       },
 

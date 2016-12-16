@@ -29,7 +29,7 @@
 
     <h1 class="title" hidden$="[[smallScreen]]">[[item.title]]</h1>
 
-    <div id="itemContainer" class$="content--box [[_computeClassContainer(smallScreen)]]">
+    <div id="itemContainer" class$="content--box [[_computeClassContainer(smallScreen)]]" hidden>
 
       <iron-pages
         selected="[[action]]"
@@ -43,11 +43,11 @@
           small-screen="{{smallScreen}}"
           load-complete="{{loadComplete}}"></polyvote-item-view>
 
-        <polyvote-item-view
+        <!--<polyvote-item-edit
           name="edit"
           item="{{item}}"
           small-screen="{{smallScreen}}"
-          load-complete="{{loadComplete}}"></polyvote-item-view>
+          load-complete="{{loadComplete}}"></polyvote-item-edit>-->
 
         <polyvote-item-results
           name="results"
@@ -134,8 +134,8 @@
       },
 
       _itemActionChanged(item, itemId, action) {
-        console.log("_itemActionChanged", item, itemId, action);
         if (action != null) {
+          this.$.itemContainer.setAttribute('hidden', '');
           // if there is no itemId, show the list of all items
           if (!Boolean(itemId)) {
             this.set('oldRoute.path', '/list/');
@@ -147,7 +147,9 @@
             return;
           }
 
+          /* If !db.loading */
           if (item) {
+            console.log("_itemActionChanged", item, itemId, action, this.$$(`polyvote-item-${action}`));
             const resolvedActionUrl = this.resolveUrl(`polyvote-item-${action}.html`);
             this.importHref(resolvedActionUrl, this._actionLoaded, this._actionErrorLoaded, true);
           }
@@ -175,6 +177,10 @@
         else {
           this.backPage = 'home/';
         }
+        // this.$$('iron-pages').notifyResize();
+        this.$$(`polyvote-item-${this.action}`).render();
+        this.$.itemContainer.removeAttribute('hidden');
+        // this.$$(`polyvote-item-${this.action}`).hidden = true;
       },
 
       _voteItem(event) {

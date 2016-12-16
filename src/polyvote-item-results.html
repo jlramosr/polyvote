@@ -103,7 +103,7 @@
 
       render() {
         this.$.optionsTemplate.render();
-        this.$.resultsContainer.removeAttribute('hidden');
+        this.notifySplices('item.options', []);
       },
 
       _computeSliderRowBackground(index) {
@@ -114,10 +114,11 @@
       
       _computenumVotesTotal(item) {
         let numVotesTotal = 0;
-        if (this.item)
+        if (this.item && this.item.options) {
           this.item.options.forEach(option => {
             numVotesTotal += option.votes;
           });
+        }
         return numVotesTotal;
       },
 
