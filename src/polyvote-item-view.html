@@ -1,6 +1,5 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
 <link rel="import" href="../bower_components/paper-radio-button/paper-radio-button.html">
 
@@ -41,41 +40,38 @@
       }
     </style>
 
-    <p id="description" class="description">{{item.description}}</p>
+    <div id="container" hidden>
 
-    <paper-radio-group id="radioGroup" class="radios" selectable="[[_computeSelectable(item.multiple)]]"> 
-      <template is="dom-repeat" items="[[item.options]]" as="option" id="optionsTemplate">
-        <paper-radio-button class="radios__row" noink name="{{index}}" id="option{{index}}">
-          <span hidden="[[!item.chars]]">[[_getRadioButtonIndexChar(index)]])</span>
-          [[option.title]]
-        </paper-radio-button>
-      </template>
-      <template is="dom-if" if="[[item.custom]]" id="customOptionTemplate">
-        <paper-radio-button class="radios__row" noink name="other">
-          <span class="radios__row__section--custom" hidden="[[!item.chars]]">
-            [[_getRadioButtonIndexChar(item.options.length)]])
-          </span>
-          <paper-input
-            class="radios__row__section--custom input"
-            label="Other"
-            required
-            error-message="If it's checked, it can't be empty"
-            no-label-float>
-          </paper-input>
-        </paper-radio-button>
-      </template>
-    </paper-radio-group>
+      <paper-radio-group id="radioGroup" class="radios" selectable="[[_computeSelectable(item.multiple)]]"> 
+        <template is="dom-repeat" items="[[item.options]]" as="option" id="optionsTemplate">
+          <paper-radio-button class="radios__row" noink name="{{index}}" id="option{{index}}">
+            <span hidden="[[!item.chars]]">[[_getRadioButtonIndexChar(index)]])</span>
+            [[option.title]]
+          </paper-radio-button>
+        </template>
+        <template is="dom-if" if="[[item.custom]]" id="customOptionTemplate">
+          <paper-radio-button class="radios__row" noink name="other">
+            <span class="radios__row__section--custom" hidden="[[!item.chars]]">
+              [[_getRadioButtonIndexChar(item.options.length)]])
+            </span>
+            <paper-input
+              class="radios__row__section--custom input"
+              label="Other"
+              required
+              error-message="If it's checked, it can't be empty"
+              no-label-float>
+            </paper-input>
+          </paper-radio-button>
+        </template>
+      </paper-radio-group>
 
-    <div class="buttons">
-      <paper-button class="buttons__button" on-tap="_voteTapped">Vote</paper-button>
+      <div class="buttons">
+        <paper-button class="buttons__button" on-tap="_voteTapped">Vote</paper-button>
+      </div>
+
+      <span id="error" class="error" hidden>You must have at least one option selected</span>
+    
     </div>
-
-    <span id="error" class="error" hidden>You have at least one option selected</span>
-
-    <div class="fabs">
-      <paper-fab class="fabs__fab" icon="edit" on-tap="_viewEditTapped"></paper-fab>
-      <paper-fab class="fabs__fab" icon="timeline" on-tap="_viewResultsTapped"></paper-fab>
-    <div>
 
   </template>
 </dom-module>
@@ -96,15 +92,10 @@
 
       },
 
-      _computeClassContainer(smallScreen) {
-        if (!this.smallScreen) {
-          return 'content--box-desktop';
-        }
-      },
-
       render() {
         this.$.optionsTemplate.render();
         this.$.customOptionTemplate.render();
+        this.$.container.removeAttribute('hidden');
       },
 
       _computeSelectable(multiple) {
@@ -136,6 +127,9 @@
                   // custom option doesn't exist
                   allValid = true;
                   this.push('item.options', {"title": titleSelected, "votes": 1, "custom": true});
+                  customOptionInput.value = '';
+                  customOptionInput.removeAttribute('required');
+                  customOptionInput.invalid = false;
                 }
                 else {
                   // custom option exists
@@ -167,6 +161,7 @@
           }
           if (allValid) {
             this.fire('vote-item-tapped', this.item);
+            this.$.radioGroup.selected = undefined;
           }
         }
         else {

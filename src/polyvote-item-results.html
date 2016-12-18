@@ -16,7 +16,7 @@
         @apply(--layout-horizontal);
         @apply(--layout-center);
         font-size: 12px;
-        padding: 10px;
+        padding: 8px;
         text-align: center;
         background: grey;
       }
@@ -57,24 +57,26 @@
         color: var(--app-secondary-color);
       }
     </style>
-    
-    <p id="description" class="description">[[item.description]]</p>
 
-    <template is="dom-repeat" items="[[item.options]]" as="option" id="optionsTemplate">
-      <div class$="slider__row [[_computeSliderRowBackground(index)]]">
-        <span class="slider__title">[[option.title]]</span>
-        <paper-slider 
-          class="slider__line"
-          disabled
-          min="0"
-          max="100"
-          value="[[_computeValueSlider(index)]]"></paper-slider>
-        <span class="slider__total">[[_computeTotalText(index)]]</span>
-      </div>
-    </template>
+    <div id="container" hidden>
 
-    <p class="total">[[numVotesTotal]] [[_computeStringVotes(numVotesTotal)]]</p>
+      <template is="dom-repeat" items="[[item.options]]" as="option" 
+                id="optionsTemplate" sort="_computeSort">
+        <div class$="slider__row [[_computeSliderRowBackground(index)]]">
+          <span class="slider__title">[[option.title]]</span>
+          <paper-slider 
+            class="slider__line"
+            disabled
+            min="0"
+            max="100"
+            value="[[_computeValueSlider(index, item.options)]]"></paper-slider>
+          <span class="slider__total">[[_computeTotalText(index, item.options)]]</span>
+        </div>
+      </template>
 
+      <p class="total">[[numVotesTotal]] [[_computeStringVotes(numVotesTotal)]]</p>
+
+    </div>
     
   </template>
 
@@ -103,7 +105,14 @@
 
       render() {
         this.$.optionsTemplate.render();
-        this.notifySplices('item.options', []);
+        this.$.container.removeAttribute('hidden');
+      },
+
+      _computeSort(a, b) {
+        if (a.votes == b.votes) {
+          return 0;
+        }
+        return a.votes > b.votes ? -1 : 1;
       },
 
       _computeSliderRowBackground(index) {

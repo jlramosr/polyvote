@@ -74,8 +74,6 @@
     <polyvote-db id="db" collection="elections" data="{{items}}" loading="{{loadingDb}}"></polyvote-db>    
     <paper-spinner class="spinner" active="[[loadingDb]]"></paper-spinner>
 
-    <h1 class="title" hidden$="[[smallScreen]]">List Elections</h1>
-
     <div id="content" class="content--list">
 
       <iron-list items="[[items]]">
@@ -96,10 +94,6 @@
         </template>
       </iron-list>
 
-    </div>
-
-    <div class="fabs">
-      <paper-fab class="fabs__fab" icon="add" on-tap="_viewNewItemTapped"></paper-fab>
     </div>
 
     <!-- Lazy Creations -->

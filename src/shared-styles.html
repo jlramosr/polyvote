@@ -6,7 +6,7 @@
   <template>
     <style>
       :root {
-        --app-primary-color: var(--paper-blue-grey-600);
+        --app-primary-color: var(--paper-blue-grey-900);
         --app-primary-color-soft: var(--paper-blue-grey-100);
         --app-primary-color-light: var(--paper-blue-grey-50);
         --app-secondary-color: var(--paper-orange-900);
@@ -30,18 +30,19 @@
       }
 
       .description {
-        margin: 0 0 10px;
+        margin: 10px;
         font-size: 12px;
         font-style: italic;
         color: #666;
       }
 
       .content--box {
-        padding: var(--app-general-padding);
         margin: 0;
+        padding: 0;
       }
 
       .content--box-desktop {
+        padding: 0 var(--app-general-padding);
         color: #757575;
         border-radius: 5px;
         background-color: #fefefe;
@@ -74,19 +75,6 @@
         @apply(--layout-center-justified);
         color: red;
         font-size: 12px;
-      }
-
-      .fabs {
-        @apply(--layout-horizontal);
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-      }
-
-      .fabs__fab {
-        --paper-fab-background: var(--app-primary-color);
-        --paper-fab-keyboard-focus-background: var(--app-primary-color-light);
-        margin: 6px !important;
       }
 
       .spinner {
@@ -122,6 +110,19 @@
         text-overflow: ellipsis;
       }
 
+      /* Tablets */
+      @media (min-width: 840px) {
+        .description {
+          padding-top: 10px;
+        }
+      }
+
+      /* Desktops */
+      @media (min-width: 1260px) {
+        .description {
+          padding-top: 10px;
+        }
+      }
     </style>
   </template>
 </dom-module>

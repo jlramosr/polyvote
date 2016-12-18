@@ -78,30 +78,21 @@
       }
 
       .main__menu {
-        @apply(--layout-horizontal);
-        @apply(--layout-center-center);
-        text-transform: uppercase;
-        background: var(--app-primary-color-light);
+        display: block;
+        width: 100%;
+        height: 28px;
+        background: var(--app-primary-color-soft);
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-        overflow: hidden;
-      }
-
-      .main__menu__title {
-        @apply(--layout-flex);
-        padding-left: 8px;
-        font-size: 16px;
-        font-weight: 400;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
       }
 
       .main__menu__tabs {
         @apply(--layout-horizontal);
+        @apply(--layout-around-justified); 
+        --paper-tabs-selection-bar-color: #000;
         height: 100%;
-        margin-left: auto;
+        margin: 0 var(--app-general-padding);
+        text-transform: uppercase;
         font-size: 12px;
-        font-weight: 800;
       }
 
       .main__menu__tab__link {
@@ -109,14 +100,10 @@
         @apply(--layout-center-center);
         text-decoration: none;
         color: #000;
-        padding: 0 4px;
-      }
-
-      .main__menu__tab__link:hover {
-        background: var(--app-primary-color-soft);
       }
 
       .main__menu__tab__icon {
+        margin-right: 2px;
         height: 16px;
         weight: 16px;
       }
@@ -176,9 +163,8 @@
           padding: 0 var(--app-general-padding-tablet);
         }
         
-        .main__menu {
-          height: 38px;
-          padding: 0 var(--app-general-padding-tablet);
+        .main__menu__tabs {
+          margin: 0 var(--app-general-padding-tablet);
         }
       }
 
@@ -196,9 +182,8 @@
           padding: 0 var(--app-general-padding-desktop);
         }
 
-        .main__menu {
-          height: 52px;
-          padding: 0 var(--app-general-padding-desktop);
+        .main__menu__tabs {
+          margin: 0 var(--app-general-padding-desktop);
         }
       }
 
@@ -264,30 +249,24 @@
           <!-- Lazy-create the tabs for larger screen sizes. -->
           <template is="dom-if" if="[[_shouldRenderBigScreen]]">
             <div class="main__menu">
-              <div class="main__menu__title">[[_getMenuTitle(page, itemTitle, smallScreen)]]</div>
+              <div class="main__menu__title">{{itemTitle}}</div>
               <div class="main__menu__tabs">
-                <a href="/item/[[itemId]]" class="main__menu__tab__link" hidden$=[[!_isItemView(page)]]>
-                  <iron-icon icon="checks" class="main__menu__tab__icon"></iron-icon>
-                  Vote
-                </a>
-                <a href="/item/[[itemId]]/results" class="main__menu__tab__link" hidden$=[[!_isItemView(page)]]>
-                  <iron-icon icon="timeline" class="main__menu__tab__icon"></iron-icon>
-                  Results
-                </a>
-                <a href="/item/[[itemId]]/edit" class="main__menu__tab__link" hidden$=[[!_isItemView(page)]]>
-                  <iron-icon icon="edit" class="main__menu__tab__icon"></iron-icon>
-                  Edit
-                </a>
-                <a href="/new/" title="New Election" class="main__menu__tab__link">
-                  <iron-icon icon="add" class="main__menu__tab__icon"></iron-icon>
-                  <span hidden$=[[_isItemView(page)]]>New Election</span>
-                </a>
-                <a href="/list/" title="Election List" class="main__menu__tab__link">
-                  <iron-icon icon="list" class="main__menu__tab__icon"></iron-icon>
-                  <span hidden$=[[_isItemView(page)]]>Election List</span>
-                </a>
               </div>
             </div>
+            <!--<div class="main__menu">
+              <paper-tabs selected="[[pageName]]" class="main__menu__tabs" attr-for-selected="name" noink>
+                <paper-tab name="list">
+                  <a href="/list/" class="main__menu__tab__link">
+                    <iron-icon icon="list" class="main__menu__tab__icon"></iron-icon>Election List
+                  </a>
+                </paper-tab>
+                <paper-tab name="new">
+                  <a href="/new/" class="main__menu__tab__link">
+                    <iron-icon icon="new" class="main__menu__tab__icon"></iron-icon>New Election
+                  </a>
+                </paper-tab>
+              </paper-tabs>
+            </div>-->
           </template>
         </app-header>
 
@@ -419,8 +398,9 @@
       },
 
       /**
-        * Show the title page on the header.
+        * Show the title page on the header
         */
+
       _getPageTitle(page, itemTitle, smallScreen) {
         if (!smallScreen) {
           return this.appTitle;
@@ -438,35 +418,6 @@
           return '404 ERROR';
         }
         return this.appTitle;
-      },
-
-      /**
-        * Show the title page on the menu.
-        */
-      _getMenuTitle(page, itemTitle) {
-        if (page == 'list') {
-          return 'Elections';
-        }
-        if (page == 'new') {
-          return 'New Election';
-        }
-        if (page == 'item') {
-          return itemTitle;
-        }
-        if (page == 'e404') {
-          return '404 ERROR';
-        }
-        return '';
-      },
-
-      /**
-        * Indicate if the current page is of an item.
-        */
-      _isItemView(page) {
-        if (page == 'item') {
-          return true;
-        }
-        return false;
       },
 
       /**

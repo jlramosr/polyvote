@@ -27,9 +27,9 @@
     <polyvote-db document id="db" document-data="{{item}}" collection="elections" item-id="{{itemId}}" loading="{{loadingDb}}"></polyvote-db>
     <paper-spinner class="spinner" active="[[loadingDb]]"></paper-spinner>
 
-    <h1 class="title" hidden$="[[smallScreen]]">[[item.title]]</h1>
-
-    <div id="itemContainer" class$="content--box [[_computeClassContainer(smallScreen)]]" hidden>
+    <div class$="content--box [[_computeClassContainer(smallScreen)]]">
+    
+      <p id="description" class="description">{{item.description}}</p>
 
       <iron-pages
         selected="[[action]]"
@@ -135,7 +135,6 @@
 
       _itemActionChanged(item, itemId, action) {
         if (action != null) {
-          this.$.itemContainer.setAttribute('hidden', '');
           // if there is no itemId, show the list of all items
           if (!Boolean(itemId)) {
             this.set('oldRoute.path', '/list/');
@@ -147,47 +146,44 @@
             return;
           }
 
-          /* If !db.loading */
-          if (item) {
-            console.log("_itemActionChanged", item, itemId, action, this.$$(`polyvote-item-${action}`));
-            const resolvedActionUrl = this.resolveUrl(`polyvote-item-${action}.html`);
-            this.importHref(resolvedActionUrl, this._actionLoaded, this._actionErrorLoaded, true);
-          }
-          else {
-            this._itemErrorLoaded();
-          }
+         // if (!this.loadingDb) {
+            if (!this._emptyObject(item)) {
+              console.log("_itemActionChanged", item, itemId, action, this.$$(`polyvote-item-${action}`));
+              const resolvedActionUrl = this.resolveUrl(`polyvote-item-${action}.html`);
+              this.importHref(resolvedActionUrl, this._actionLoaded, this._actionErrorLoaded, true);
+            }
+            //else {
+            //  this._itemErrorLoaded();
+            //}
+          //}
         }
       },
 
       _itemErrorLoaded() {
-        console.log('_itemErrorLoaded');
         this.fire('show-error-page', `${this._capitalizeFirstLetter(this.itemName)} not found`);
       },
 
       _actionErrorLoaded() {
-        console.log('_actionErrorLoaded');
         this.fire('show-error-page', `${this._capitalizeFirstLetter(this.itemName)} action not defined`);
       },
 
       _actionLoaded() {
-        this.itemTitle = this.item.title;
         if (this.action == 'results') {
           this.backPage = `item/${this.itemId}/`;
+          this.itemTitle = `${this.item.title} results`;
         }
         else {
           this.backPage = 'home/';
+          this.itemTitle = `${this.item.title}`;
         }
-        // this.$$('iron-pages').notifyResize();
         this.$$(`polyvote-item-${this.action}`).render();
-        this.$.itemContainer.removeAttribute('hidden');
-        // this.$$(`polyvote-item-${this.action}`).hidden = true;
       },
 
       _voteItem(event) {
         this.$.db.updateItem(event.detail);
         this.set('routeData.action', 'results');
       },
-
+    
       _viewEditItem(event) {
         this.set('routeData.action', 'edit');
       },
