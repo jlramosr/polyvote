@@ -6,11 +6,13 @@
   <template>
     <style>
       :root {
-        --app-primary-color: var(--paper-blue-grey-900);
-        --app-primary-color-soft: var(--paper-blue-grey-100);
-        --app-primary-color-light: var(--paper-blue-grey-50);
+        --app-primary-color: #7f1515;
+        --app-primary-color-soft: #c6b6b6;
+        --app-primary-color-light: #e5dcdc;
+        --app-primary-color-dark:#2d0103;
         --app-secondary-color: var(--paper-orange-900);
         --app-secondary-color-soft: var(--paper-orange-300);
+        --app-error-color: red;
         --app-general-padding: 16px;
         --app-general-padding-tablet: 140px;
         --app-general-padding-desktop: 280px;
@@ -30,7 +32,6 @@
       }
 
       .description {
-        margin: 10px;
         font-size: 12px;
         font-style: italic;
         color: #666;
@@ -38,11 +39,11 @@
 
       .content--box {
         margin: 0;
-        padding: 0;
+        padding: 10px;
       }
 
       .content--box-desktop {
-        padding: 0 var(--app-general-padding);
+        padding: 10px var(--app-general-padding);
         color: #757575;
         border-radius: 5px;
         background-color: #fefefe;
@@ -63,8 +64,8 @@
         --paper-button: {
           min-width: 102px;
           background-color: #fafafa;
-          border: 1px solid var(--app-primary-color);
-          color: var(--app-primary-color);
+          border: 1px solid var(--app-primary-color-dark);
+          color: var(--app-primary-color-dark);
           font-size: 16px;
           margin: 0px 16px;
         }
@@ -73,7 +74,7 @@
       .error {
         @apply(--layout-horizontal);
         @apply(--layout-center-justified);
-        color: red;
+        color: var(--app-error-color);
         font-size: 12px;
       }
 
@@ -110,19 +111,10 @@
         text-overflow: ellipsis;
       }
 
-      /* Tablets */
-      @media (min-width: 840px) {
-        .description {
-          padding-top: 10px;
-        }
+      a {
+        text-decoration: none;
       }
 
-      /* Desktops */
-      @media (min-width: 1260px) {
-        .description {
-          padding-top: 10px;
-        }
-      }
     </style>
   </template>
 </dom-module>

@@ -61,7 +61,7 @@
     <div id="container" hidden>
 
       <template is="dom-repeat" items="[[item.options]]" as="option" 
-                id="optionsTemplate" sort="_computeSort">
+                id="optionsTemplate">
         <div class$="slider__row [[_computeSliderRowBackground(index)]]">
           <span class="slider__title">[[option.title]]</span>
           <paper-slider 
@@ -93,8 +93,6 @@
       properties: {
 
         item: Object,
-
-        smallScreen: Boolean,
 
         numVotesTotal: {
           type: Number,
@@ -131,8 +129,11 @@
         return numVotesTotal;
       },
 
-      _computeValueSlider(index) {
-        return (this.item.options[index].votes * 100 / this.numVotesTotal).toFixed(2);
+      _computeValueSlider(index, options) {
+        if (index >= options.length) {
+          return 0;
+        }
+        return (options[index].votes * 100 / this.numVotesTotal).toFixed(2);
       },
 
       _computeStringVotes(numVotesTotal) {
@@ -141,8 +142,11 @@
         return 'votes';
       },
 
-      _computeTotalText(index) {
-        const votes = this.item.options[index].votes;
+      _computeTotalText(index, options) {
+        if (index >= options.length) {
+          return 0;
+        }
+        const votes = options[index].votes;
         let percent = 0;
         if (this.numVotesTotal)
           percent = (votes * 100 / this.numVotesTotal).toFixed(2);

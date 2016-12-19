@@ -39,9 +39,7 @@
 
         <polyvote-item-view
           name="view"
-          item="{{item}}"
-          small-screen="{{smallScreen}}"
-          load-complete="{{loadComplete}}"></polyvote-item-view>
+          item="{{item}}"></polyvote-item-view>
 
         <!--<polyvote-item-edit
           name="edit"
@@ -51,9 +49,7 @@
 
         <polyvote-item-results
           name="results"
-          item="{{item}}"
-          small-screen="{{smallScreen}}"
-          load-complete="{{loadComplete}}"></polyvote-item-results>
+          item="{{item}}"></polyvote-item-results>
             
       </iron-pages>
 
@@ -87,21 +83,29 @@
           notify: true
         },
 
-        backPage: {
-          type: String,
-          notify: true
-        },
-
         item: Object,
 
+        /*
+         * The name of the items in singular. 
+         */
         itemName: {
           type: String,
           value: 'item'
         },
 
-        itemTitle: {
-          type: String,
-          notify: true
+        /*
+         * Item information for parent element.
+         *
+         * It used to complete toolbar title, icons, etc.
+         * {"id": <itemId>, "title": <itemTitle>,
+         *  "action": <actionItem>, "backPage" : <url>}
+         */
+        itemInfo: {
+          type: Object,
+          notify: true,
+          value: _ => {
+            return {};
+          }
         },
 
         smallScreen: Boolean,
@@ -121,6 +125,10 @@
       observers: [
         '_itemActionChanged(item, itemId, action)'
       ],
+
+      _getItemId(itemInfo) {
+        return this.itemInfo.id;
+      },
 
       _routeChanged(routeData) {
         this.itemId = routeData.item_id || '';
@@ -145,10 +153,8 @@
             this.set('routeData.action', 'view');
             return;
           }
-
          // if (!this.loadingDb) {
             if (!this._emptyObject(item)) {
-              console.log("_itemActionChanged", item, itemId, action, this.$$(`polyvote-item-${action}`));
               const resolvedActionUrl = this.resolveUrl(`polyvote-item-${action}.html`);
               this.importHref(resolvedActionUrl, this._actionLoaded, this._actionErrorLoaded, true);
             }
@@ -169,13 +175,15 @@
 
       _actionLoaded() {
         if (this.action == 'results') {
-          this.backPage = `item/${this.itemId}/`;
-          this.itemTitle = `${this.item.title} results`;
+          this.set('itemInfo.backPage', `item/${this.itemInfo.id}/`);
+          this.set('itemInfo.title', `${this.item.title} results`);
         }
         else {
-          this.backPage = 'home/';
-          this.itemTitle = `${this.item.title}`;
+          this.set('itemInfo.backPage', 'home/');
+          this.set('itemInfo.title', `${this.item.title}`);
         }
+        this.set('itemInfo.id', this.itemId);
+        this.set('itemInfo.action', this.action);
         this.$$(`polyvote-item-${this.action}`).render();
       },
 

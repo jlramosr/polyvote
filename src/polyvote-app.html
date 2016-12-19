@@ -36,19 +36,29 @@
         vertical-align: center;
         font-weight: 100;
         color: #fff; 
-        background-color: var(--app-primary-color);
         height: 46px;
+      }
+
+      .toolbar--background-new {
+        background-color: var(--app-primary-color-dark);
+      }
+
+      .toolbar--background-default {
+        background-color: var(--app-primary-color);
       }
 
       .main {
         padding: 0;
       }
 
-      .main__toolbar {
+      .main__href {
+        color: #fff;
       }
 
       .main__title-content {
+        @apply(--layout-horizontal);
         margin-left: 8px;
+        padding-right: 16px;
         overflow: hidden;
       }
 
@@ -61,12 +71,19 @@
         text-overflow: ellipsis;
       }
 
-      .main__button {
+      .main__button--default {
         min-width: 40px;
       }
 
-      .main__button--position-left {
-        margin-right: -8px;
+      .main__button--social {
+        margin: 0 2px;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+      }
+
+      .main__button--back {
+        margin: 0 -8px;
       }
 
       .main__title__icon {
@@ -74,6 +91,7 @@
       }
 
       .main__button--position-right {
+        @apply(--layout-horizontal);
         margin-left: auto;
       }
 
@@ -104,19 +122,18 @@
         font-weight: 800;
       }
 
-      .main__menu__tab__link {
+      .main__menu__tab {
         @apply(--layout-horizontal);
         @apply(--layout-center-center);
-        text-decoration: none;
-        color: #000;
+        color: var(--app-primary-color);
         padding: 0 4px;
       }
 
-      .main__menu__tab__link:hover {
+      .main__menu__tab:hover {
         background: var(--app-primary-color-soft);
       }
 
-      .main__menu__tab__icon {
+      .main__menu__icon {
         height: 16px;
         weight: 16px;
       }
@@ -221,7 +238,7 @@
       <template is="dom-if" if="[[_shouldRenderSmallScreen]]">
 
         <app-drawer id="drawer" align="right" swipe-open>
-          <app-toolbar class="toolbar">
+          <app-toolbar class="toolbar toolbar--background-default">
             <div class="drawer__title">
               <iron-image src="/images/manifest/icon-24x24.png" class="main__title__icon"></iron-image>
               [[appTitle]]
@@ -241,50 +258,68 @@
       <!-- Main content -->
       <app-header-layout id="headerLayout" class="main" flex>
         <app-header fixed>
-          <app-toolbar class="toolbar main__toolbar">
+
+          <app-toolbar class$="toolbar [[_computeBackgroundToolbar(page)]] main__toolbar">
             <paper-icon-button 
               icon="back" 
-              hidden$="[[_computeBackButtonHidden(smallScreen, backPage)]]"
+              hidden$="[[!backPage]]"
               on-tap="_backTapped"
-              class="main__button main__button--position-left"></paper-icon-button>
+              class="main__button--default main__button--back"></paper-icon-button>
             <div class="main__title-content">
               <div class="main__title-content__title" main-title>
                 <template is="dom-if" if="[[_shouldRenderBigScreen]]">
                   <iron-image src="/images/manifest/icon-24x24.png" class="main__title__icon"></iron-image>
                 </template>
-                [[_getPageTitle(page, itemTitle, smallScreen)]]
+                {{header}}
               </div>
             </div>
             <div class="main__button--position-right">
-              <paper-icon-button icon="menu" class="main__button" drawer-toggle></paper-icon-button>
-              <paper-icon-button icon="twitter" class="main__button" hidden$="[[smallScreen]]"></paper-icon-button>
-              <paper-icon-button icon="facebook" class="main__button" hidden$="[[smallScreen]]"></paper-icon-button>
+              <a href="/item/[[itemId]]/" class="main__href" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'view')]]">
+                <iron-icon icon="checks" class="main__button--default"></iron-icon>
+              </a>
+              <a href="/item/[[itemId]]/results/" class="main__href" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'results')]]">
+                <iron-icon icon="timeline" class="main__button--default"></iron-icon>
+              </a>
+              <a href="/item/[[itemId]]/edit/" class="main__href" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'edit')]]">
+                <iron-icon icon="edit" class="main__button--default"></iron-icon>
+              </a>
+              <a href="/new/" class="main__href" hidden$="[[_computeHideAction(smallScreen, page, '', 'new')]]">
+                <iron-icon icon="add" class="main__button--default"></iron-icon>
+              </a>
+              <paper-icon-button icon="menu" class="main__button--default" drawer-toggle></paper-icon-button>
+              <a href="http://twitter.com" class="main__href" hidden$="[[smallScreen]]">  
+                <iron-icon icon="twitter" class="main__button--social"></iron-icon>
+              </a>
+              <a href="http://facebook.com" class="main__href" hidden$="[[smallScreen]]">  
+                <iron-icon icon="facebook" class="main__button--social"></iron-icon>
+              </a>
             </div>
           </app-toolbar>
+
           <!-- Lazy-create the tabs for larger screen sizes. -->
           <template is="dom-if" if="[[_shouldRenderBigScreen]]">
             <div class="main__menu">
-              <div class="main__menu__title">[[_getMenuTitle(page, itemTitle, smallScreen)]]</div>
+              <div class="main__menu__title">{{menuHeader}}</div>
               <div class="main__menu__tabs">
-                <a href="/item/[[itemId]]" class="main__menu__tab__link" hidden$=[[!_isItemView(page)]]>
-                  <iron-icon icon="checks" class="main__menu__tab__icon"></iron-icon>
+                <a href="/item/[[itemId]]" class="main__menu__tab" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'view', 'true')]]">
+                  <iron-icon icon="checks" class="main__menu__icon"></iron-icon>
                   Vote
                 </a>
-                <a href="/item/[[itemId]]/results" class="main__menu__tab__link" hidden$=[[!_isItemView(page)]]>
-                  <iron-icon icon="timeline" class="main__menu__tab__icon"></iron-icon>
+                <a href="/item/[[itemId]]/results" class="main__menu__tab" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'results', 'true')]]">
+                  <iron-icon icon="timeline" class="main__menu__icon"></iron-icon>
                   Results
                 </a>
-                <a href="/item/[[itemId]]/edit" class="main__menu__tab__link" hidden$=[[!_isItemView(page)]]>
-                  <iron-icon icon="edit" class="main__menu__tab__icon"></iron-icon>
+                <a href="/item/[[itemId]]/edit" class="main__menu__tab" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'edit', 'true')]]">
+                  <iron-icon icon="edit" class="main__menu__icon"></iron-icon>
                   Edit
                 </a>
-                <a href="/new/" title="New Election" class="main__menu__tab__link">
-                  <iron-icon icon="add" class="main__menu__tab__icon"></iron-icon>
-                  <span hidden$=[[_isItemView(page)]]>New Election</span>
+                <a href="/new/" title="New Election" class="main__menu__tab" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'new', 'true')]]">
+                  <iron-icon icon="add" class="main__menu__icon"></iron-icon>
+                  <span hidden$="[[_isItemPage(page)]]">New Election</span>
                 </a>
-                <a href="/list/" title="Election List" class="main__menu__tab__link">
-                  <iron-icon icon="list" class="main__menu__tab__icon"></iron-icon>
-                  <span hidden$=[[_isItemView(page)]]>Election List</span>
+                <a href="/list/" title="Election List" class="main__menu__tab" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'list', 'true')]]">
+                  <iron-icon icon="list" class="main__menu__icon"></iron-icon>
+                  <span hidden$="[[_isItemPage(page)]]">Election List</span>
                 </a>
               </div>
             </div>
@@ -312,11 +347,10 @@
           <polyvote-item
             name="item"
             item-name='election'
+            item-info="{{itemInfo}}"
             load-complete="{{loadComplete}}"
             old-route="{{route}}"
             route="{{subroute}}"
-            back-page="{{backPage}}"
-            item-title="{{itemTitle}}"
             small-screen="[[smallScreen]]"></polyvote-item>
           
           <polyvote-e404
@@ -353,15 +387,14 @@
           value: "640px"
         },
 
+        header: String,
+
+        menuHeader: String,
+
         page: {
           type: String,
           reflectToAttribute: true,
-          observer: '_pageChanged'
-        },
-
-        backPage: {
-          type: String,
-          value: ''
+          observer: '_pageChanged',
         },
 
         path: {
@@ -369,9 +402,14 @@
           observer: '_pathChanged'
         },
 
-        itemTitle: {
-          type: String,
-          value: ''
+        itemInfo: {
+          type: Object,
+          value: {
+            'id': '',
+            'title': '',
+            'action': '',
+            'backPage': ''
+          }
         },
 
         year: {
@@ -402,7 +440,8 @@
       },
 
       observers: [
-        '_routePageChanged(routeData.page)'
+        '_routePageChanged(routeData.page)',
+        '_pageItemChanged(page, itemInfo.title, itemInfo.id, itemInfo.backPage, smallScreen)'
       ],
 
       created() {
@@ -418,55 +457,103 @@
         });
       },
 
-      /**
-        * Show the title page on the header.
-        */
-      _getPageTitle(page, itemTitle, smallScreen) {
-        if (!smallScreen) {
-          return this.appTitle;
-        }
-        if (page == 'list') {
-          return 'Elections';
-        }
+      /*
+       * Changes background toolbar color depending on the current page.
+       */
+      _computeBackgroundToolbar(page) {
         if (page == 'new') {
-          return 'New Election';
+          return 'toolbar--background-new';
         }
-        if (page == 'item') {
-          return itemTitle;
-        }
-        if (page == 'e404') {
-          return '404 ERROR';
-        }
-        return this.appTitle;
+        return 'toolbar--background-default';
       },
 
-      /**
-        * Show the title page on the menu.
-        */
-      _getMenuTitle(page, itemTitle) {
-        if (page == 'list') {
-          return 'Elections';
-        }
-        if (page == 'new') {
-          return 'New Election';
-        }
-        if (page == 'item') {
-          return itemTitle;
-        }
-        if (page == 'e404') {
-          return '404 ERROR';
-        }
-        return '';
-      },
-
-      /**
-        * Indicate if the current page is of an item.
-        */
-      _isItemView(page) {
+      /*
+       * It indicates if current page correspond to an item.
+       */
+      _isItemPage(page) {
         if (page == 'item') {
           return true;
         }
         return false;
+      },
+
+      /**
+        * Fired when page, item info for this element or screen size changed.
+        *
+        * It completes headers and back page.
+        */
+      _pageItemChanged(page, itemTitle, itemId, itemBackPage, smallScreen) {
+        let header = '';
+        let back = '';
+        if (page == 'list') {
+          header = 'Elections';
+          itemId = '';
+        }
+        if (page == 'new') {
+          header = 'New Election';
+          itemId = '';
+        }
+        if (page == 'item') {
+          header = itemTitle;
+          back = itemBackPage;
+          itemId = itemId;
+        }
+        if (page == 'e404') {
+          header = '404 ERROR';
+          back = 'home/';
+          itemId = '';
+        }
+        if (smallScreen) {
+          // small screens
+          this.header = header;
+          this.backPage = back;
+        }
+        else {
+          // big screens
+          this.header = this.appTitle;
+          this.menuHeader = header;
+          this.backPage = '';
+        }
+        this.itemId = itemId;
+      },
+
+      /**
+        * Decide when a button action must be hidden.
+        *
+        * @param {Boolean} True if small screen.
+        * @param {String} The current url page.
+        * @param {String} The current url action.
+        * @param {String} The action of the current button.
+        * @param {Boolean} True if button is in the menu (not in toolbar).
+        */
+      _computeHideAction(smallScreen, page, action, actionButton, menu) {
+        if (menu) {
+          if (page == 'item') {
+            if (action == actionButton)
+              return true;
+          }
+          if (page == 'new' && actionButton != 'list') {
+            return true;
+          }
+          if (page == 'list' && actionButton != 'new') {
+            return true;
+          }
+          return false;
+        }
+        else {
+          if (!smallScreen) return true;
+          if (page == 'item') {
+            if (action == actionButton || actionButton == 'new')
+              return true;
+          }
+          if (page == 'list' && actionButton != 'new') {
+            return true;
+          }
+          if (page == 'new') {
+            return true;
+          }
+          return false;
+        }
       },
 
       /**
@@ -497,18 +584,10 @@
         if (page != null) {
           // list route is eagerly loaded
           if (page == 'list') { 
-            this.backPage = '';
             this._pageLoaded(Boolean(oldPage));
             return;
+            // other routes are lazy loaded
           }
-          // other routes are lazy loaded
-          if (page == 'new') {
-            this.backPage = '';
-          }
-          if (page == 'e404') {
-            this.backPage = 'home';
-          }
-          // page == 'item' is handled by own element
           // Load page import on demand. Show 404 page if fails
           const resolvedPageUrl = this.resolveUrl(`polyvote-${page}.html`);
           this.importHref(resolvedPageUrl, this._pageLoaded, this._pageErrorLoaded, true);
@@ -534,6 +613,7 @@
               //}
               //this._notifyNetworkStatus();
               this.loadComplete = true;
+              console.log("LOAD COMPLETE", this.itemInfo);
               this.$.headerLayout.resetLayout();
             });
           });
@@ -568,10 +648,6 @@
 
       _computeShouldRenderBigScreen(smallScreen, loadComplete) {
         return !smallScreen && loadComplete;
-      },
-
-      _computeBackButtonHidden(smallScreen, backPage) {
-        return !smallScreen || !Boolean(backPage);
       }
 
     });
