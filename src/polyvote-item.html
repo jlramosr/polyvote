@@ -41,11 +41,11 @@
           name="view"
           item="{{item}}"></polyvote-item-view>
 
-        <!--<polyvote-item-edit
+        <polyvote-item-edit
           name="edit"
           item="{{item}}"
           small-screen="{{smallScreen}}"
-          load-complete="{{loadComplete}}"></polyvote-item-edit>-->
+          load-complete="{{loadComplete}}"></polyvote-item-edit>
 
         <polyvote-item-results
           name="results"
@@ -184,7 +184,9 @@
         }
         this.set('itemInfo.id', this.itemId);
         this.set('itemInfo.action', this.action);
-        this.$$(`polyvote-item-${this.action}`).render();
+        const pageLoaded = this.$$(`polyvote-item-${this.action}`);
+        if (pageLoaded.render)
+          pageLoaded.render();
       },
 
       _voteItem(event) {

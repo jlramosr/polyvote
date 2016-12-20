@@ -13,6 +13,11 @@
         position: relative;
       }
 
+      .buttons__button {
+        border: 1px solid var(--app-primary-color);
+        color: var(--app-primary-color);
+      }
+
       .radios {
         outline: 0;
         display: block;
@@ -69,7 +74,7 @@
         <paper-button class="buttons__button" on-tap="_voteTapped">Vote</paper-button>
       </div>
 
-      <span id="error" class="error" hidden>You must have at least one option selected</span>
+      <span id="error" class="error" opacity>You must have at least one option selected</span>
     
     </div>
 
@@ -104,7 +109,6 @@
       },
 
       _voteTapped() {
-        this.$.error.setAttribute('hidden','');
         let indexSelected = this.$.radioGroup.selected;
         if (indexSelected == 0 && !this.$$('#option0').checked)
           indexSelected = undefined;
@@ -160,11 +164,30 @@
           if (allValid) {
             this.fire('vote-item-tapped', this.item);
             this.$.radioGroup.selected = undefined;
+            customOptionInput.errorMessage = '';
+            customOptionInput.invalid = false;
           }
         }
         else {
-          this.$.error.removeAttribute('hidden');
+          if (!this._isShowingErrorMessage()) {
+            this._showErrorMessage();
+            setTimeout(_ => {
+              this._removeErrorMessage();
+            }, 3000);
+          }
         }
+      },
+
+      _isShowingErrorMessage() {
+        return !this.$.error.hasAttribute('opacity');
+      },
+
+      _showErrorMessage() {
+        this.$.error.removeAttribute('opacity');
+      },
+
+      _removeErrorMessage() {
+        this.$.error.setAttribute('opacity','');
       },
 
       _optionExists(title) {

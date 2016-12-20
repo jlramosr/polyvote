@@ -281,11 +281,6 @@
           notify: true
         },
 
-        titleHeader: {
-          type: String,
-          value: 'Create new election'
-        },
-
         smallScreen: Boolean,
 
         loadComplete: Boolean,
@@ -397,12 +392,6 @@
           const dialog = Polymer.dom(this.root).querySelector('#' + idDialog);
           dialog.open();
         }
-      },
-
-      _getTitleHeader(edit, titleHeader) {
-        if (edit)
-          return `${titleHeader} - EDIT`;
-        return 'Create new election';
       },
 
       /**

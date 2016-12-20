@@ -26,17 +26,14 @@
         display: block;
         height: 100vh;
       }
-
-      app-header {
-        
-      }
-
+      
       .toolbar {
         @apply(--layout-horizontal);
         vertical-align: center;
         font-weight: 100;
         color: #fff; 
-        height: 46px;
+        height: var(--app-height-toolbar);
+        font-size: 18px;
       }
 
       .toolbar--background-new {
@@ -73,6 +70,7 @@
 
       .main__button--default {
         min-width: 40px;
+        margin: 8px 0;
       }
 
       .main__button--social {
@@ -92,6 +90,7 @@
 
       .main__button--position-right {
         @apply(--layout-horizontal);
+        @apply(--layout-center);
         margin-left: auto;
       }
 
@@ -137,6 +136,11 @@
         height: 16px;
         weight: 16px;
       }
+      
+      .drawer {
+        @apply(--layout-vertical);
+        --app-drawer-width: 206px;
+      }
 
       .drawer__title {
         @apply(--layout-horizontal);
@@ -145,21 +149,58 @@
         text-transform: uppercase;
       }
 
-      .drawer__list {
-        margin: 0 var(--app-general-padding);
+      .drawer__container {
+        @apply(--layout-vertical);
+        height: calc(100% - var(--app-toolbar-height));
+        position: relative;
       }
 
-      .drawer__list__link {
+      .drawer__link {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        color: var(--app-primary-color);
         outline: none;
-        display: block;
-        padding: 0 16px;
         text-decoration: none;
-        color: var(--app-secondary-color);
-        line-height: 40px;
+      }
+
+      .drawer__link--list {
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--app-primary-color-soft);
+      }
+
+      .drawer__link--list:hover {
+        background: var(--app-primary-color-light);
       }
 
       .drawer__list__icon {
-        margin: 0 6px 3px;
+        margin-right: 8px;
+        min-width: 24px;
+      }
+
+      .drawer__social {
+        @apply(--layout-horizontal);
+        @apply(--layout-center-center);
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        padding: 80px 20px;
+      }
+
+      .drawer__link--social {
+        margin: 0 4px;
+        padding: 16px;
+        border-bottom: 3px solid var(--app-primary-color-soft);
+      }
+
+      .drawer__social__icon {
+        min-width: 30px;
+        border: 2px solid var(--app-primary-color);
+        padding: 5px;
+        border-radius: 50%;
+      }
+
+      .drawer__social__icon:hover {
+        background: var(--app-primary-color-light);
       }
 
       /*footer {
@@ -182,7 +223,7 @@
       /* Tablets */
       @media (min-width: 840px) {
         .toolbar {
-          height: 62px;
+          height: var(--app-toolbar-height-tablet);
         }
 
         .main {
@@ -194,7 +235,7 @@
         }
         
         .main__menu {
-          height: 38px;
+          height: var(--app-menu-height-tablet);
           padding: 0 var(--app-general-padding-tablet);
         }
       }
@@ -202,7 +243,7 @@
       /* Desktops */
       @media (min-width: 1260px) {
         .toolbar {
-          height: 84px;
+          height: var(--app-toolbar-height-desktop);
         }
 
         .main {
@@ -214,7 +255,7 @@
         }
 
         .main__menu {
-          height: 52px;
+          height: var(--app-menu-height-desktop);
           padding: 0 var(--app-general-padding-desktop);
         }
       }
@@ -237,21 +278,39 @@
       <!-- Lazy-create the drawer for small screen sizes. -->
       <template is="dom-if" if="[[_shouldRenderSmallScreen]]">
 
-        <app-drawer id="drawer" align="right" swipe-open>
+        <app-drawer id="drawer" class="drawer" align="right" swipe-open>
           <app-toolbar class="toolbar toolbar--background-default">
             <div class="drawer__title">
               <iron-image src="/images/manifest/icon-24x24.png" class="main__title__icon"></iron-image>
               [[appTitle]]
             </div>
           </app-toolbar>
-          <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer__list" role="navigation">
-            <a name="list" href="/list/" class="drawer__list__link">
-              <iron-icon icon="list" class="drawer__list__icon"></iron-icon>Election List
-            </a>
-            <a name="new" href="/new/" class="drawer__list__link">
-              <iron-icon icon="new" class="drawer__list__icon"></iron-icon>New Election
-            </a>
-          </iron-selector>
+          <div class="drawer__container">
+            <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer__list" role="navigation">
+              <a name="list" href="/list/" class="drawer__link drawer__link--list" on-tap="_closeDrawer">
+                <iron-icon icon="list" class="drawer__list__icon"></iron-icon>Election List
+              </a>
+              <a name="new" href="/new/" class="drawer__link drawer__link--list" on-tap="_closeDrawer">
+                <iron-icon icon="new" class="drawer__list__icon"></iron-icon>New Election
+              </a>
+            </iron-selector>
+            <div class="drawer__social">
+              <a
+                href="https://twitter.com/jlramosromero"
+                target="_blank" 
+                class="drawer__link drawer__link--social" 
+                on-tap="_closeDrawer">  
+                <iron-icon icon="twitter" class="drawer__social__icon"></iron-icon>
+              </a>
+              <a
+                href="https://www.facebook.com/futbolypensamiento"
+                target="_blank"
+                class="drawer__link drawer__link--social"
+                on-tap="_closeDrawer">  
+                <iron-icon icon="facebook" class="drawer__social__icon"></iron-icon>
+              </a>
+            </div>
+          </div>
         </app-drawer>
       </template>
 
@@ -274,23 +333,42 @@
               </div>
             </div>
             <div class="main__button--position-right">
-              <a href="/item/[[itemId]]/" class="main__href" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'view')]]">
+              <a
+                href="/item/[[itemId]]/"
+                class="main__href" 
+                hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'view')]]">
                 <iron-icon icon="checks" class="main__button--default"></iron-icon>
               </a>
-              <a href="/item/[[itemId]]/results/" class="main__href" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'results')]]">
+              <a
+                href="/item/[[itemId]]/results/"
+                class="main__href"
+                hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'results')]]">
                 <iron-icon icon="timeline" class="main__button--default"></iron-icon>
               </a>
-              <a href="/item/[[itemId]]/edit/" class="main__href" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'edit')]]">
+              <a
+                href="/item/[[itemId]]/edit/"
+                class="main__href"
+                hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'edit')]]">
                 <iron-icon icon="edit" class="main__button--default"></iron-icon>
               </a>
-              <a href="/new/" class="main__href" hidden$="[[_computeHideAction(smallScreen, page, '', 'new')]]">
+              <a
+                href="/new/"
+                class="main__href"
+                hidden$="[[_computeHideAction(smallScreen, page, '', 'new')]]">
                 <iron-icon icon="add" class="main__button--default"></iron-icon>
               </a>
               <paper-icon-button icon="menu" class="main__button--default" drawer-toggle></paper-icon-button>
-              <a href="http://twitter.com" class="main__href" hidden$="[[smallScreen]]">  
+              <a
+                href="https://twitter.com/jlramosromero"
+                target="_blank"
+                class="main__href"
+                hidden$="[[smallScreen]]">  
                 <iron-icon icon="twitter" class="main__button--social"></iron-icon>
               </a>
-              <a href="http://facebook.com" class="main__href" hidden$="[[smallScreen]]">  
+              <a href="https://www.facebook.com/futbolypensamiento"
+                target="_blank"
+                class="main__href"
+                hidden$="[[smallScreen]]">  
                 <iron-icon icon="facebook" class="main__button--social"></iron-icon>
               </a>
             </div>
@@ -301,23 +379,40 @@
             <div class="main__menu">
               <div class="main__menu__title">{{menuHeader}}</div>
               <div class="main__menu__tabs">
-                <a href="/item/[[itemId]]" class="main__menu__tab" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'view', 'true')]]">
+                <a
+                  href="/item/[[itemId]]"
+                  class="main__menu__tab"
+                  hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'view', 'true')]]">
                   <iron-icon icon="checks" class="main__menu__icon"></iron-icon>
                   Vote
                 </a>
-                <a href="/item/[[itemId]]/results" class="main__menu__tab" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'results', 'true')]]">
+                <a
+                  href="/item/[[itemId]]/results"
+                  class="main__menu__tab"
+                  hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'results', 'true')]]">
                   <iron-icon icon="timeline" class="main__menu__icon"></iron-icon>
                   Results
                 </a>
-                <a href="/item/[[itemId]]/edit" class="main__menu__tab" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'edit', 'true')]]">
+                <a
+                  href="/item/[[itemId]]/edit"
+                  class="main__menu__tab"
+                  hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'edit', 'true')]]">
                   <iron-icon icon="edit" class="main__menu__icon"></iron-icon>
                   Edit
                 </a>
-                <a href="/new/" title="New Election" class="main__menu__tab" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'new', 'true')]]">
+                <a
+                  href="/new/"
+                  title="New Election"
+                  class="main__menu__tab"
+                  hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'new', 'true')]]">
                   <iron-icon icon="add" class="main__menu__icon"></iron-icon>
                   <span hidden$="[[_isItemPage(page)]]">New Election</span>
                 </a>
-                <a href="/list/" title="Election List" class="main__menu__tab" hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'list', 'true')]]">
+                <a
+                  href="/list/"
+                  title="Election List"
+                  class="main__menu__tab"
+                  hidden$="[[_computeHideAction(smallScreen, page, itemInfo.action, 'list', 'true')]]">
                   <iron-icon icon="list" class="main__menu__icon"></iron-icon>
                   <span hidden$="[[_isItemPage(page)]]">Election List</span>
                 </a>
@@ -334,6 +429,7 @@
 
           <polyvote-list 
             name="list"
+            item-name='election'
             load-complete="{{loadComplete}}"
             route="{{route}}"
             small-screen="[[smallScreen]]"></polyvote-list>
@@ -444,6 +540,13 @@
         '_pageItemChanged(page, itemInfo.title, itemInfo.id, itemInfo.backPage, smallScreen)'
       ],
 
+      _closeDrawer() {
+        const drawer = Polymer.dom(this.root).querySelector('#drawer');
+        if (drawer) {
+          drawer.close();
+        }
+      },
+
       created() {
         // Custom elements polyfill safe way to indicate an element has been upgraded.
         this.removeAttribute('unresolved');
@@ -491,6 +594,7 @@
         }
         if (page == 'new') {
           header = 'New Election';
+          back = 'home/'
           itemId = '';
         }
         if (page == 'item') {
@@ -613,7 +717,6 @@
               //}
               //this._notifyNetworkStatus();
               this.loadComplete = true;
-              console.log("LOAD COMPLETE", this.itemInfo);
               this.$.headerLayout.resetLayout();
             });
           });

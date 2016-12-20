@@ -8,18 +8,28 @@
       :root {
         --app-primary-color: #7f1515;
         --app-primary-color-soft: #c6b6b6;
-        --app-primary-color-light: #e5dcdc;
+        --app-primary-color-light: #f7efef;
         --app-primary-color-dark:#2d0103;
         --app-secondary-color: var(--paper-orange-900);
         --app-secondary-color-soft: var(--paper-orange-300);
-        --app-error-color: red;
+        --app-error-color: #54634d;
         --app-general-padding: 16px;
         --app-general-padding-tablet: 140px;
         --app-general-padding-desktop: 280px;
+        --app-toolbar-height: 46px;
+        --app-toolbar-height-tablet: 62px;
+        --app-toolbar-height-desktop: 84px;
+        --app-menu-height-tablet: 38px;
+        --app-menu-height-desktop: 52px;
       }
 
       [hidden] {
         display: none !important;
+      }
+
+      [opacity] {
+        opacity: 0 !important;
+        transition: all .5s ease .20s;
       }
 
       .title {
@@ -76,6 +86,7 @@
         @apply(--layout-center-justified);
         color: var(--app-error-color);
         font-size: 12px;
+        font-weight: bold;
       }
 
       .spinner {
