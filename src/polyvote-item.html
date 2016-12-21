@@ -29,7 +29,9 @@
 
     <div class$="content--box [[_computeClassContainer(smallScreen)]]">
     
-      <p id="description" class="description">{{item.description}}</p>
+      <p id="description" class="description" hidden$="[[_isEditAction(action)]]">
+        {{item.description}}
+      </p>
 
       <iron-pages
         selected="[[action]]"
@@ -44,7 +46,6 @@
         <polyvote-item-edit
           name="edit"
           item="{{item}}"
-          small-screen="{{smallScreen}}"
           load-complete="{{loadComplete}}"></polyvote-item-edit>
 
         <polyvote-item-results
@@ -126,6 +127,10 @@
         '_itemActionChanged(item, itemId, action)'
       ],
 
+      _isEditAction(action) {
+        return action == 'edit';
+      },
+
       _getItemId(itemInfo) {
         return this.itemInfo.id;
       },
@@ -153,15 +158,18 @@
             this.set('routeData.action', 'view');
             return;
           }
-         // if (!this.loadingDb) {
-            if (!this._emptyObject(item)) {
-              const resolvedActionUrl = this.resolveUrl(`polyvote-item-${action}.html`);
-              this.importHref(resolvedActionUrl, this._actionLoaded, this._actionErrorLoaded, true);
-            }
-            //else {
-            //  this._itemErrorLoaded();
-            //}
-          //}
+
+          if (!this._emptyObject(item)) {
+            const resolvedActionUrl = this.resolveUrl(`polyvote-item-${action}.html`);
+            this.importHref(resolvedActionUrl, this._actionLoaded, this._actionErrorLoaded, true);
+          }
+          else {
+            setTimeout(_ => {
+              if (this._emptyObject(this.item)) {
+                this._itemErrorLoaded();
+              }
+            }, 5000);       
+          }
         }
       },
 

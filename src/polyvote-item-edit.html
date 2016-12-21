@@ -16,42 +16,28 @@
     
     <polyvote-new
       edit
-      id="[[item.id]]"
       item="[[item]]"
       load-complete="{{loadComplete}}"></polyvote-new>
 
   </template>
 
   <script>
-  (function() {
-    'use strict';
+    (function() {
+      'use strict';
 
-    Polymer({
+      Polymer({
 
-      is: 'polyvote-item-edit',
+        is: 'polyvote-item-edit',
 
-      properties: {
+        properties: {
 
-        item: Object,
+          item: Object,
 
-        loadComplete: Boolean
+          loadComplete: Boolean
 
-      },
+        }
 
-      _getTitleOption1(item) {
-        return item.options[0].title;
-      },
-
-      _getTitleRestOptions(item) {
-        let options = [];
-        item.options.map((option,index) => { 
-          if (index > 0 && !option.custom)
-            options.push(option);
-        });
-        return options;
-      } 
-
-    });
+      });
 
   })();
   </script>

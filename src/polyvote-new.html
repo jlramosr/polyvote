@@ -298,8 +298,25 @@
 
       },
 
+      observers: [
+        '_editItemChanged(edit, item)'
+      ],
+
       ready() {
         this._setEmptyFields();
+      },
+
+      _editItemChanged(edit, item) {
+        if (edit && item.title) {
+          // is edit view, add blank temporary option
+          this._addOption();
+          const removeIcons = Polymer.dom(this.$.options).querySelectorAll('iron-icon');
+          //TODO
+          console.log(removeIcons);
+          removeIcons.forEach(icon => {
+            icon.removeAttribute('hidden');
+          });
+        }
       },
 
       _computeClassContainer(smallScreen) {
@@ -372,6 +389,10 @@
 
       _saveTapped() {
         if (this._inputsValidate())
+          if (this.item.options.length > this.optionsRequired) {
+            // last option is empty
+            this._removeOption(this.item.options.length - 1);
+          }
           this.$$('#db').updateItem(this.item);
       },
 

@@ -91,8 +91,13 @@
 
       _dataChanged(data, oldData) {
         /*this.loading = true;
-        if (oldData) {
+        if (Object.keys(data).length > 0) {
           this.loading = false;
+        }
+        else {
+          setTimeout(_ => {
+            this.loading = false;
+          }, 10000);
         }*/
       },
 
