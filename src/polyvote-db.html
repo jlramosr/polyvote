@@ -63,8 +63,7 @@
           */
         documentData: {
           type: Object,
-          notify: true,
-          observer: '_dataChanged'
+          notify: true
         },
 
         /**
@@ -89,16 +88,8 @@
         }
       },
 
-      _dataChanged(data, oldData) {
-        /*this.loading = true;
-        if (Object.keys(data).length > 0) {
-          this.loading = false;
-        }
-        else {
-          setTimeout(_ => {
-            this.loading = false;
-          }, 10000);
-        }*/
+      getItem() {
+        return this.documentData;
       },
 
       /**

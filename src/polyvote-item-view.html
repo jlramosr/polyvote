@@ -26,7 +26,7 @@
       .radios__row {
         display: block;
         font-size: 16px;
-        padding: 8px !important;
+        padding-top: 6px !important;
       }
 
       .radios__row[checked] {
@@ -132,6 +132,7 @@
                   customOptionInput.value = '';
                   customOptionInput.removeAttribute('required');
                   customOptionInput.invalid = false;
+                  customOptionInput.errorMessage = '';
                 }
                 else {
                   // custom option exists
@@ -152,6 +153,8 @@
               titleSelected = option.title;
               option.votes += 1;
               allValid = true;
+              customOptionInput.errorMessage = '';
+              customOptionInput.invalid = false;
             }
           }
           else {
@@ -164,8 +167,6 @@
           if (allValid) {
             this.fire('vote-item-tapped', this.item);
             this.$.radioGroup.selected = undefined;
-            customOptionInput.errorMessage = '';
-            customOptionInput.invalid = false;
           }
         }
         else {

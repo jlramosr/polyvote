@@ -134,26 +134,26 @@
         <template is="dom-repeat" items="[[item.options]]" as="option">
           <div id="option[[index]]" class="options__option">
             <paper-input
-              id="option[[index]]"
+              id="option-input[[index]]"
               class$="options__option__input [[_computeOptionInputClass(index)]]"
               label="Option [[_getOptionNum(index)]]"
               value="{{option.title}}"
               on-value-changed = "_optionChanged"
-              name="option[[index]]"
+              name="option-input[[index]]"
               required="[[_isOptionRequired(index)]]"
               error-message="This option can't be empty"></paper-input>
             <iron-icon
-              id="remove[[index]]"
+              id="remove-icon[[index]]"
               icon="clear"
               class="option__option__icon"
               on-tap="_removeOptionTapped"
               tabindex="-1"
               index="[[index]]"
-              hidden></iron-icon>
+              hidden$="[[_computeHideRemoveButton(index)]]"></iron-icon>
             <!-- Lazy-create the tooltip -->
             <template is="dom-if" if="[[loadComplete]]">
               <paper-tooltip
-                for="remove[[index]]" 
+                for="remove-icon[[index]]" 
                 offset="5">Remove option {{_getOptionNum(index)}}</paper-tooltip>
             </template>
           </div>
@@ -190,7 +190,7 @@
         </template>
         <template is="dom-if" if="[[edit]]">
           <paper-button class="buttons__button" on-tap="_saveTapped">Save</paper-button>
-          <paper-button class="buttons__button" on-tap="_clearTapped">Reset</paper-button>
+          <paper-button class="buttons__button" on-tap="_clearTapped">Cancel</paper-button>
         </template>
       </div>
 
@@ -238,8 +238,10 @@
             dialog-confirm autofocus>OK</paper-button>
           <iron-icon icon="info" class="dialog__info-icon"></iron-icon>
         </paper-dialog>
-
-        <polyvote-db document id="db" collection="elections" item-id="{{itemId}}" loading="{{loadingDb}}"></polyvote-db>
+        
+        <template is="dom-if" if="[[!edit]]">
+          <polyvote-db document id="db" collection="elections" item-id="{{itemId}}" loading="{{loadingDb}}"></polyvote-db>
+        </template>
         
       </template>
 
@@ -271,6 +273,12 @@
           observer: '_itemIdChanged'
         },
 
+        /**
+          * The mode of the view.
+          *
+          * True if it's edit view for existing items. 
+          * In other case this element show new mode.
+          */
         edit: {
           type: Boolean,
           value: false
@@ -298,25 +306,28 @@
 
       },
 
-      observers: [
-        '_editItemChanged(edit, item)'
-      ],
-
       ready() {
         this._setEmptyFields();
       },
 
-      _editItemChanged(edit, item) {
-        if (edit && item.title) {
-          // is edit view, add blank temporary option
-          this._addOption();
-          const removeIcons = Polymer.dom(this.$.options).querySelectorAll('iron-icon');
-          //TODO
-          console.log(removeIcons);
-          removeIcons.forEach(icon => {
-            icon.removeAttribute('hidden');
-          });
-        }
+      /**
+        * Add an option of item list options
+        */
+      _addOption() {
+        this.push('item.options', {"title": "", "votes": 0, "custom": false});
+      },
+
+      /**
+        * Set focus in title input
+        */
+      focusTitle() {
+        this.$.title.focus();
+      },
+
+      _computeHideRemoveButton(index) {
+        if (index < this.optionsRequired || !this.item.options[index].title)
+          return true;
+        return false;
       },
 
       _computeClassContainer(smallScreen) {
@@ -356,6 +367,7 @@
         // add required options to election
         for (let i=0; i < this.optionsRequired; i++)
           this._addOption();
+        this.focusTitle();
       },
 
       /**
@@ -375,31 +387,43 @@
       },
 
       /**
-        * Fired when it gets itemId by databinding. This happens when an item is created.
+        * Fired when it gets itemId by databinding. 
+        * This happens when an item is created or we want to edit one existing.
         *
         * @param {String} Id of the new object created.
         */
       _itemIdChanged(itemId) {
-        if (Boolean(itemId)){
+        if (!this.edit && Boolean(itemId)){
           this.set('route.path', `/item/${itemId}/`);
           this._setEmptyFields();
           this.itemId = null;
         }
       },
 
+      /**
+        * Fired when the user tap on save button in edit mode.
+        *
+        * Update the new information to the item.
+        */
       _saveTapped() {
-        if (this._inputsValidate())
-          if (this.item.options.length > this.optionsRequired) {
+        if (this._inputsValidate()) {
+          let options = this.item.options;
+          const optionsLength = options.length;
+          if (optionsLength > this.optionsRequired && !options[optionsLength - 1].title) {
             // last option is empty
-            this._removeOption(this.item.options.length - 1);
+            this._removeOption(optionsLength - 1);
           }
-          this.$$('#db').updateItem(this.item);
+          this.fire('save-item-tapped', this.item);
+        }
       },
 
+      /**
+        * Fired when the user tap on clear button in new mode.
+        */
       _clearTapped() {
         if (this.edit) {
-          // return to original parameters before edit.
-          this.item = this.$$('#db').getItem(this.id);
+          // reset view with old values
+          this.fire('reset-item-tapped');
         }
         else {
           // clear all fields
@@ -437,7 +461,8 @@
         if (newValue.value != "") {
           // value is not empty
           if (indexOption >= this.optionsRequired) {
-            const removeButton = Polymer.dom(this.$.options).querySelector(`#remove${indexOption}`);
+            const removeButton = Polymer.dom(this.$.options)
+                                  .querySelector(`#remove-icon${indexOption}`);
             removeButton.removeAttribute('hidden');
           }
           if (numOptions == (indexOption + 1)) {
@@ -449,17 +474,16 @@
           // value is empty
           if (numOptions > this.optionsRequired) {
             this._removeOption(indexOption);
-            Polymer.dom(this.$.options).querySelector('#remove2').hidden = true;
           }
+          let newEmptyInput = Polymer.dom(this.$.options)
+                                .querySelector(`#option-input${numOptions-1}`);
+          newEmptyInput.focus();
+          if (numOptions <= this.optionsRequired && indexOption == 0) {
+            newEmptyInput = Polymer.dom(this.$.options)
+                              .querySelector(`#option-input${indexOption}`);
+            newEmptyInput.focus();
+          } 
         }
-      },
-
-      /**
-        * Add an option of item list options.
-        * 
-        */
-      _addOption() {
-        this.push('item.options', {"title": "", "votes": 0, "custom": false});
       },
 
       /**

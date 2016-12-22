@@ -45,6 +45,7 @@
 
         <polyvote-item-edit
           name="edit"
+          item-id="{{itemInfo.id}}"
           item="{{item}}"
           load-complete="{{loadComplete}}"></polyvote-item-edit>
 
@@ -119,6 +120,8 @@
 
       listeners: {
         'vote-item-tapped': '_voteItem',
+        'save-item-tapped': '_updateItem',
+        'reset-item-tapped': '_resetItem',
         'view-edit-item-tapped': '_viewEditItem',
         'view-results-item-tapped': '_viewResultsItem'
       },
@@ -129,10 +132,6 @@
 
       _isEditAction(action) {
         return action == 'edit';
-      },
-
-      _getItemId(itemInfo) {
-        return this.itemInfo.id;
       },
 
       _routeChanged(routeData) {
@@ -182,9 +181,14 @@
       },
 
       _actionLoaded() {
+        const pageLoaded = this.$$(`polyvote-item-${this.action}`);
         if (this.action == 'results') {
           this.set('itemInfo.backPage', `item/${this.itemInfo.id}/`);
           this.set('itemInfo.title', `${this.item.title} results`);
+        }
+        if (this.action == 'edit') {
+          this.set('itemInfo.backPage', `item/${this.itemInfo.id}/`);
+          this.set('itemInfo.title', `${this.item.title} edit`);
         }
         else {
           this.set('itemInfo.backPage', 'home/');
@@ -192,15 +196,28 @@
         }
         this.set('itemInfo.id', this.itemId);
         this.set('itemInfo.action', this.action);
-        const pageLoaded = this.$$(`polyvote-item-${this.action}`);
-        if (pageLoaded.render)
+        if (pageLoaded.render) {
           pageLoaded.render();
+        }
       },
 
       _voteItem(event) {
         this.$.db.updateItem(event.detail);
         this.set('routeData.action', 'results');
       },
+
+      _updateItem(event) {
+        this.$.db.updateItem(event.detail);
+        this.set('routeData.action', 'view');
+      },
+          
+      _resetItem(event) {
+        const oldItem = JSON.stringify(this.$.db.getItem());
+        this.item = JSON.parse(oldItem);
+        console.log(JSON.parse(oldItem));
+        this.set('routeData.action', 'view');
+      },   
+
     
       _viewEditItem(event) {
         this.set('routeData.action', 'edit');

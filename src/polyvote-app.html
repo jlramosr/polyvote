@@ -354,7 +354,7 @@
               <a
                 href="/new/"
                 class="main__href"
-                hidden$="[[_computeHideAction(page, smallScreen, '', 'toolbar', 'new')]]">
+                hidden$="[[_computeHideAction(page, smallScreen, '', 'new', 'toolbar')]]">
                 <iron-icon icon="add" class="main__button--default"></iron-icon>
               </a>
               <paper-icon-button icon="menu" class="main__button--default" drawer-toggle></paper-icon-button>
@@ -635,6 +635,8 @@
         if (place == 'menu') {
           // menu
           if (page == 'item') {
+            if (action == 'edit')
+              return true;
             if (action == actionButton || !itemId)
               return true;
           }
@@ -653,6 +655,8 @@
           // toolbar
           if (!smallScreen) return true;
           if (page == 'item') {
+            if (action == 'edit')
+              return true;
             if (action == actionButton || actionButton == 'new' || !itemId)
               return true;
           }
@@ -692,12 +696,18 @@
 
       _pageChanged(page, oldPage) {
         if (page != null) {
+
           // list route is eagerly loaded
           if (page == 'list') { 
             this._pageLoaded(Boolean(oldPage));
             return;
             // other routes are lazy loaded
           }
+
+          // Focus, order, colocation, etc. of main elements
+          if (this.$$('polyvote-new').focusTitle)
+            this.$$('polyvote-new').focusTitle();
+
           // Load page import on demand. Show 404 page if fails
           const resolvedPageUrl = this.resolveUrl(`polyvote-${page}.html`);
           this.importHref(resolvedPageUrl, this._pageLoaded, this._pageErrorLoaded, true);
