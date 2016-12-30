@@ -229,6 +229,8 @@
       this.$.db.itemId = itemId;
       this.$.db.deleteItem();
       this.set('route.path', '/list/');
+      this.$.db.document = false;
+      this.$.db.itemId = null;
     }
 
   });

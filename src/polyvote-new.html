@@ -307,14 +307,7 @@
       },
 
       ready() {
-        this._setEmptyFields();
-      },
-
-      /**
-        * Add an option of item list options
-        */
-      _addOption() {
-        this.push('item.options', {"title": "", "votes": 0, "custom": false});
+        this.setEmptyFields();
       },
 
       /**
@@ -322,6 +315,31 @@
         */
       focusTitle() {
         this.$.title.focus();
+      },
+
+      /**
+      * Leave all inputs empty and deselect all checkboxes.
+      */
+      setEmptyFields() {
+        // initialize item
+        this.item = {
+          "options": [],
+          "custom": false,
+          "multiple": false,
+          "chars": false
+        };
+        this.$.title.invalid = false;
+        // add required options to election
+        for (let i=0; i < this.optionsRequired; i++)
+          this._addOption();
+        this.focusTitle();
+      },
+
+      /**
+        * Add an option of item list options
+        */
+      _addOption() {
+        this.push('item.options', {"title": "", "votes": 0, "custom": false});
       },
 
       _computeHideRemoveButton(index) {
@@ -354,23 +372,6 @@
       },
 
       /**
-      * Leave all inputs empty and deselect all checkboxes.
-      */
-      _setEmptyFields() {
-        // initialize item
-        this.item = {
-          "options": [],
-          "custom": false,
-          "multiple": false,
-          "chars": false
-        };
-        // add required options to election
-        for (let i=0; i < this.optionsRequired; i++)
-          this._addOption();
-        this.focusTitle();
-      },
-
-      /**
         * Fired when the user tap on create button.
         *
         * Order create a new item to database with the
@@ -395,7 +396,7 @@
       _itemIdChanged(itemId) {
         if (!this.edit && Boolean(itemId)){
           this.set('route.path', `/item/${itemId}/`);
-          this._setEmptyFields();
+          this.setEmptyFields();
           this.itemId = null;
         }
       },
@@ -427,7 +428,7 @@
         }
         else {
           // clear all fields
-          this._setEmptyFields();
+          this.setEmptyFields();
         }
       },
 
@@ -455,7 +456,7 @@
         }
         this.stopPropagation = false;
         // over here only pass one time
-        
+                                          
         const indexOption = event.model.__data__.index;
         const numOptions = this.item.options.length; 
         if (newValue.value != "") {

@@ -705,8 +705,9 @@
           }
 
           // Focus, order, colocation, etc. of main elements
-          if (this.$$('polyvote-new').focusTitle)
-            this.$$('polyvote-new').focusTitle();
+          if (this.$$('polyvote-new').focusTitle) {
+            this.$$('polyvote-new').setEmptyFields();
+          }
 
           // Load page import on demand. Show 404 page if fails
           const resolvedPageUrl = this.resolveUrl(`polyvote-${page}.html`);

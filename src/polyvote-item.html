@@ -46,7 +46,7 @@
         <polyvote-item-edit
           name="edit"
           item-id="{{itemInfo.id}}"
-          item="{{item}}"
+          item="[[item]]"
           load-complete="{{loadComplete}}"></polyvote-item-edit>
 
         <polyvote-item-results
@@ -146,6 +146,8 @@
       },
 
       _itemActionChanged(item, itemId, action) {
+        console.log("itemActionChanged de item", item, itemId, action, this.oldRoute);
+        this.loadingDb = true;
         if (action != null) {
           // if there is no itemId, show the list of all items
           if (!Boolean(itemId)) {
@@ -161,19 +163,21 @@
           if (!this._emptyObject(item)) {
             const resolvedActionUrl = this.resolveUrl(`polyvote-item-${action}.html`);
             this.importHref(resolvedActionUrl, this._actionLoaded, this._actionErrorLoaded, true);
+            this.loadingDb = false;
           }
-          else {
+          else if (this.oldRoute.path != "/list/") {
             setTimeout(_ => {
               if (this._emptyObject(this.item)) {
                 this._itemErrorLoaded();
               }
+              this.loadingDb = false;
             }, 5000);       
           }
         }
       },
 
       _itemErrorLoaded() {
-        this.fire('show-error-page', `${this._capitalizeFirstLetter(this.itemName)} not found`);
+        this.fire('show-error-page', `${this._capitalizeFirstLetter(this.itemName)} not found or time limit exceeded`);
       },
 
       _actionErrorLoaded() {
