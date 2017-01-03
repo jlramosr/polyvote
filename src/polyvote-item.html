@@ -24,7 +24,7 @@
       data="{{routeData}}"
       tail="{{subroute}}"></app-route>
 
-    <polyvote-db document id="db" document-data="{{item}}" collection="elections" item-id="{{itemId}}" loading="{{loadingDb}}"></polyvote-db>
+    <polyvote-db document id="db" collection="elections" document-data="{{item}}" item-id="{{itemId}}" loading="{{loadingDb}}"></polyvote-db>
     <paper-spinner class="spinner" active="[[loadingDb]]"></paper-spinner>
 
     <div class$="content--box [[_computeClassContainer(smallScreen)]]">
@@ -41,17 +41,17 @@
 
         <polyvote-item-view
           name="view"
-          item="{{item}}"></polyvote-item-view>
+          item="[[item]]"></polyvote-item-view>
 
         <polyvote-item-edit
           name="edit"
-          item-id="{{itemInfo.id}}"
+          item-id="[[itemId]]"
           item="[[item]]"
           load-complete="{{loadComplete}}"></polyvote-item-edit>
 
         <polyvote-item-results
           name="results"
-          item="{{item}}"></polyvote-item-results>
+          item="[[item]]"></polyvote-item-results>
             
       </iron-pages>
 
@@ -87,6 +87,8 @@
 
         item: Object,
 
+        itemId: String,
+
         /*
          * The name of the items in singular. 
          */
@@ -104,10 +106,7 @@
          */
         itemInfo: {
           type: Object,
-          notify: true,
-          value: _ => {
-            return {};
-          }
+          notify: true
         },
 
         smallScreen: Boolean,
@@ -130,6 +129,10 @@
         '_itemActionChanged(item, itemId, action)'
       ],
 
+      clearEditView() {
+        this.$$('polyvote-item-edit').clear();
+      },
+
       _isEditAction(action) {
         return action == 'edit';
       },
@@ -145,8 +148,13 @@
         }
       },
 
+      /*
+       * Fired when item or action changes
+       *
+       * It's the pages handle
+       */
       _itemActionChanged(item, itemId, action) {
-        console.log("itemActionChanged de item", item, itemId, action, this.oldRoute);
+        console.log("itemActionChanged de item", item);
         this.loadingDb = true;
         if (action != null) {
           // if there is no itemId, show the list of all items
@@ -186,19 +194,21 @@
 
       _actionLoaded() {
         const pageLoaded = this.$$(`polyvote-item-${this.action}`);
-        if (this.action == 'results') {
+        this.set('itemInfo.id', this.itemId);
+        if (this.action == 'edit') {
+          this.set('itemInfo.backPage', '');
+          this.set('itemInfo.title', `${this.item.title} edit`);
+        }
+        else if (this.action == 'results') {
+          this.clearEditView();
           this.set('itemInfo.backPage', `item/${this.itemInfo.id}/`);
           this.set('itemInfo.title', `${this.item.title} results`);
         }
-        if (this.action == 'edit') {
-          this.set('itemInfo.backPage', `item/${this.itemInfo.id}/`);
-          this.set('itemInfo.title', `${this.item.title} edit`);
-        }
         else {
+          this.clearEditView();
           this.set('itemInfo.backPage', 'home/');
           this.set('itemInfo.title', `${this.item.title}`);
         }
-        this.set('itemInfo.id', this.itemId);
         this.set('itemInfo.action', this.action);
         if (pageLoaded.render) {
           pageLoaded.render();
@@ -214,11 +224,10 @@
         this.$.db.updateItem(event.detail);
         this.set('routeData.action', 'view');
       },
+
           
       _resetItem(event) {
-        const oldItem = JSON.stringify(this.$.db.getItem());
-        this.item = JSON.parse(oldItem);
-        console.log(JSON.parse(oldItem));
+        this.clearEditView();
         this.set('routeData.action', 'view');
       },   
 

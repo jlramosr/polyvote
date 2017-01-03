@@ -264,8 +264,7 @@
         },
 
         item: {
-          type: Object,
-          notify: true
+          type: Object
         },
 
         itemId: {
@@ -321,6 +320,12 @@
       * Leave all inputs empty and deselect all checkboxes.
       */
       setEmptyFields() {
+        // Clear all error messages of options (if there was one)
+        for (let i=0; i < this.optionsRequired; i++) {
+          const optionInput = this.$$(`#option-input${i}`);
+          if (optionInput)
+            optionInput.invalid = false;
+        }
         // initialize item
         this.item = {
           "options": [],
@@ -330,8 +335,9 @@
         };
         this.$.title.invalid = false;
         // add required options to election
-        for (let i=0; i < this.optionsRequired; i++)
+        for (let i=0; i < this.optionsRequired; i++) {
           this._addOption();
+        }
         this.focusTitle();
       },
 

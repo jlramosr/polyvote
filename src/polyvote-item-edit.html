@@ -13,11 +13,10 @@
         position: relative;
       }
     </style>
-    
+
     <polyvote-new
       edit
-      item-id={{itemId}}
-      item="{{item}}"
+      item="[[itemClone]]"
       load-complete="{{loadComplete}}"></polyvote-new>
 
   </template>
@@ -32,12 +31,25 @@
 
         properties: {
 
-          item: Object,
+          item: {
+            type: Object,
+            observer: '_itemChanged'
+          },
+
+          itemClone: Object,
 
           loadComplete: Boolean,
 
           route: String
 
+        },
+
+        clear() {
+          this.itemClone = (JSON.parse(JSON.stringify(this.item)));
+        },
+
+        _itemChanged(item) {
+          this.itemClone = (JSON.parse(JSON.stringify(item)));
         }
 
       });

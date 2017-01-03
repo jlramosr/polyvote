@@ -125,11 +125,18 @@
         @apply(--layout-horizontal);
         @apply(--layout-center-center);
         color: var(--app-primary-color);
+        box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
         padding: 0 4px;
+        margin: 6px;
+      }
+              
+      .main__menu__tab--simple {
+        border: 0;
       }
 
       .main__menu__tab:hover {
         background: var(--app-primary-color-soft);
+        color: #000;
       }
 
       .main__menu__icon {
@@ -334,21 +341,21 @@
             </div>
             <div class="main__button--position-right">
               <a
-                href="/item/[[itemId]]/"
+                href="/item/[[itemInfo.id]]/"
                 class="main__href" 
-                hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'view', 'toolbar', itemId)]]">
+                hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'view', 'toolbar', itemInfo.id)]]">
                 <iron-icon icon="checks" class="main__button--default"></iron-icon>
               </a>
               <a
-                href="/item/[[itemId]]/results/"
+                href="/item/[[itemInfo.id]]/results/"
                 class="main__href"
-                hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'results', 'toolbar', itemId)]]">
+                hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'results', 'toolbar', itemInfo.id)]]">
                 <iron-icon icon="timeline" class="main__button--default"></iron-icon>
               </a>
               <a
-                href="/item/[[itemId]]/edit/"
+                href="/item/[[itemInfo.id]]/edit/"
                 class="main__href"
-                hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'edit', 'toolbar', itemId)]]">
+                hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'edit', 'toolbar', itemInfo.id)]]">
                 <iron-icon icon="edit" class="main__button--default"></iron-icon>
               </a>
               <a
@@ -380,23 +387,23 @@
               <div class="main__menu__title">{{menuHeader}}</div>
               <div class="main__menu__tabs">
                 <a
-                  href="/item/[[itemId]]"
+                  href="/item/[[itemInfo.id]]"
                   class="main__menu__tab"
-                  hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'view', 'menu', itemId)]]">
+                  hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'view', 'menu', itemInfo.id)]]">
                   <iron-icon icon="checks" class="main__menu__icon"></iron-icon>
                   Vote
                 </a>
                 <a
-                  href="/item/[[itemId]]/results"
+                  href="/item/[[itemInfo.id]]/results"
                   class="main__menu__tab"
-                  hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'results', 'menu', itemId)]]">
+                  hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'results', 'menu', itemInfo.id)]]">
                   <iron-icon icon="timeline" class="main__menu__icon"></iron-icon>
                   Results
                 </a>
                 <a
-                  href="/item/[[itemId]]/edit"
+                  href="/item/[[itemInfo.id]]/edit"
                   class="main__menu__tab"
-                  hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'edit', 'menu', itemId)]]">
+                  hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'edit', 'menu', itemInfo.id)]]">
                   <iron-icon icon="edit" class="main__menu__icon"></iron-icon>
                   Edit
                 </a>
@@ -404,7 +411,7 @@
                   href="/new/"
                   title="New Election"
                   class="main__menu__tab"
-                  hidden$="[[_computeHideAction(page, smallScreen, '', 'new', 'menu', itemId)]]">
+                  hidden$="[[_computeHideAction(page, smallScreen, '', 'new', 'menu', itemInfo.id)]]">
                   <iron-icon icon="add" class="main__menu__icon"></iron-icon>
                   <span hidden$="[[_isItemPage(page)]]">New Election</span>
                 </a>
@@ -412,7 +419,7 @@
                   href="/list/"
                   title="Election List"
                   class="main__menu__tab"
-                  hidden$="[[_computeHideAction(page, smallScreen, '', 'list', 'menu', itemId)]]">
+                  hidden$="[[_computeHideAction(page, smallScreen, '', 'list', 'menu', itemInfo.id)]]">
                   <iron-icon icon="list" class="main__menu__icon"></iron-icon>
                   <span hidden$="[[_isItemPage(page)]]">Election List</span>
                 </a>
@@ -618,7 +625,6 @@
           this.menuHeader = header;
           this.backPage = '';
         }
-        this.itemId = itemId;
       },
 
       /**
@@ -697,16 +703,19 @@
       _pageChanged(page, oldPage) {
         if (page != null) {
 
+          // Focus, order, colocation, etc. of main elements
+          if (oldPage == 'item') {
+            this.$$('polyvote-item').clearEditView();
+          }
+          if (this.$$('polyvote-new').focusTitle) {
+            this.$$('polyvote-new').setEmptyFields();
+          }
+
           // list route is eagerly loaded
           if (page == 'list') { 
             this._pageLoaded(Boolean(oldPage));
             return;
             // other routes are lazy loaded
-          }
-
-          // Focus, order, colocation, etc. of main elements
-          if (this.$$('polyvote-new').focusTitle) {
-            this.$$('polyvote-new').setEmptyFields();
           }
 
           // Load page import on demand. Show 404 page if fails
