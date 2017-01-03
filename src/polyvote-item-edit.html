@@ -44,12 +44,17 @@
 
         },
 
+        addOption() {
+          this.$$('polyvote-new').addOption();
+        },
+
         clear() {
           this.itemClone = (JSON.parse(JSON.stringify(this.item)));
         },
 
         _itemChanged(item) {
           this.itemClone = (JSON.parse(JSON.stringify(item)));
+          this.addOption();
         }
 
       });

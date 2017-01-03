@@ -336,7 +336,7 @@
         this.$.title.invalid = false;
         // add required options to election
         for (let i=0; i < this.optionsRequired; i++) {
-          this._addOption();
+          this.addOption();
         }
         this.focusTitle();
       },
@@ -344,8 +344,9 @@
       /**
         * Add an option of item list options
         */
-      _addOption() {
-        this.push('item.options', {"title": "", "votes": 0, "custom": false});
+      addOption() {
+        if (this.item.options)
+          this.push('item.options', {"title": "", "votes": 0, "custom": false});
       },
 
       _computeHideRemoveButton(index) {
@@ -462,7 +463,7 @@
         }
         this.stopPropagation = false;
         // over here only pass one time
-                                          
+                                        
         const indexOption = event.model.__data__.index;
         const numOptions = this.item.options.length; 
         if (newValue.value != "") {
@@ -474,7 +475,7 @@
           }
           if (numOptions == (indexOption + 1)) {
             // user has focus on the last option
-            this._addOption();
+            this.addOption();
           }
         }
         else {

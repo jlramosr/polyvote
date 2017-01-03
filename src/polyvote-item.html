@@ -137,7 +137,24 @@
         return action == 'edit';
       },
 
+      /*
+       * Fired when route change (any route)
+       *
+       */
       _routeChanged(routeData) {
+        if (this.itemId) {
+          //there is active item
+          if (routeData.action == 'edit') {
+            this.clearEditView();
+            if (routeData.action == this.action) {
+              /* 
+               * if there is no change of route, I must add an extra option to edit view,
+               * else this option is adding in _itemChanged(item) of polyvote-item-edit 
+               */
+              this.$$('polyvote-item-edit').addOption();
+            }
+          }
+        }
         this.itemId = routeData.item_id || '';
         this.action = routeData.action || '';
       },
@@ -154,7 +171,6 @@
        * It's the pages handle
        */
       _itemActionChanged(item, itemId, action) {
-        console.log("itemActionChanged de item", item);
         this.loadingDb = true;
         if (action != null) {
           // if there is no itemId, show the list of all items
@@ -199,13 +215,11 @@
           this.set('itemInfo.backPage', '');
           this.set('itemInfo.title', `${this.item.title} edit`);
         }
-        else if (this.action == 'results') {
-          this.clearEditView();
+        else if (this.action == 'results') { 
           this.set('itemInfo.backPage', `item/${this.itemInfo.id}/`);
           this.set('itemInfo.title', `${this.item.title} results`);
         }
         else {
-          this.clearEditView();
           this.set('itemInfo.backPage', 'home/');
           this.set('itemInfo.title', `${this.item.title}`);
         }
