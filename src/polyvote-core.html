@@ -1,6 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/polymerfire/firebase.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-storage-script.html">
 
 <dom-module id="polyvote-core">
   <template>
@@ -20,7 +21,33 @@
 
     Polymer({
 
-      is: 'polyvote-core'
+      is: 'polyvote-core',
+
+      properties: {
+
+        database: {
+          type: Object,
+          notify: true
+        },
+
+        storage: {
+          type: Object,
+          notify: true
+        },
+
+      },
+
+      attached() {
+        const config = {
+          apiKey: 'AIzaSyDld5TuIzVB_uN8hRDz5fzE6Kwl8NQdGdI',
+          authDomain: 'polyvote-e8c0a.firebaseapp.com',
+          storageBucket: 'gs://polyvote-e8c0a.appspot.com'
+        };
+
+        firebase.initializeApp(config);
+
+        this.storage = firebase.storage();
+      }
 
     });
 

@@ -273,7 +273,7 @@
 
     </style>
 
-    <polyvote-core></polyvote-core>
+    <polyvote-core storage="{{storage}}" database="{{database}}"></polyvote-core>
     
     <app-location route="{{route}}" path="{{path}}"></app-location>
     <app-route
@@ -447,12 +447,14 @@
 
           <polyvote-new
             name="new" 
+            storage="{{storage}}"
             load-complete="{{loadComplete}}"
             route="{{route}}"
             small-screen="[[smallScreen]]"></polyvote-new>
 
           <polyvote-item
             name="item"
+            storage="{{storage}}"
             item-name='election'
             item-info="{{itemInfo}}"
             load-complete="{{loadComplete}}"

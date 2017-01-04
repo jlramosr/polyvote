@@ -1,0 +1,41 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<script>
+  (function() {
+    'use strict';
+
+    Polymer({
+
+      is: 'polyvote-storage',
+
+
+      properties: {
+
+        storage: Object,
+
+      },
+
+      uploadFile(file) {
+        this.uploadUrl = undefined;
+        const storageRef = this.storage.ref();
+        var uploadTask = storageRef.child('images/' + file.name).put(file);
+        // Register three observers:
+        // 1. 'state_changed' observer, called any time the state changes
+        // 2. Error observer, called on failure
+        // 3. Completion observer, called on successful completion
+        uploadTask.on('state_changed', snapshot => {
+          // Observe state change events such as progress, pause, and resume
+        }, error => {
+          console.log("UPLOAD ERROR");
+        }, _ => {
+          // Handle successful uploads on complete
+          // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+          const uploadUrl = uploadTask.snapshot.downloadURL;
+          this.fire('file-uploaded', { "url": uploadUrl })
+        });
+      }
+      
+    });
+
+  })();
+</script>

@@ -36,8 +36,8 @@
       .item__image {
         background-color: #ddd;
         border-radius: 50%;
-        height: 52px;
-        width: 52px;
+        min-height: 52px;
+        min-width: 52px;
       }
 
       .item__detail {
@@ -67,7 +67,12 @@
       }
 
       .item__icon {
-        color: var(--app-primary-color);
+        --paper-icon-button: {
+          color: var(--app-primary-color);
+          min-height: 40px;
+          min-width: 40px;
+          opacity: 0.8;
+        }
       }
 
       .dialog {
@@ -89,7 +94,7 @@
       <iron-list items="[[items]]">
         <template>
           <div class$="item [[_computeItemClass(index, items.length)]]" on-tap="_itemTapped" tabindex$="[[tabIndex]]">
-            <iron-image class="item__image" sizing="contain" src="[[item.image]]"></iron-image>
+            <iron-image class="item__image" sizing="cover" src="[[item.image]]"></iron-image>
             <div class="item__detail">
               <div class="item__title">[[item.title]]</div>
               <p class="item__description">[[item.description]]</p>

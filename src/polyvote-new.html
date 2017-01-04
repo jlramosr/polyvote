@@ -12,11 +12,66 @@
       :host {
         display: block;
       }
+
+      .main {
+        @apply(--layout-horizontal);
+        width: 100%;
+      }
+
+      .main__inputs {
+        @apply(--layout-flex);
+        margin-left: 16px;
+      }
+
+      .main__upload {
+        margin: auto;
+        padding-top: 10px;
+        width: 102px;
+        height: 102px;
+      }
+
+      .main__upload__container {
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+        width: 100%;
+        height: 100%;
+        background: #EEE;
+        border-radius: 50%;
+        cursor: pointer;
+        outline: none;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      .main__upload__image {
+        --iron-image-width: 100%;
+        --iron-image-height:: 100%;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        outline: none;
+      }
+
+      .main__upload__icon {
+        --iron-icon-width: 50%;
+        --iron-icon-height: 50%;
+        --iron-icon-fill-color: var(--app-secondary-color);
+        opacity: 0.4;
+        outline: none;
+      }
+
+      .input__description {
+        --paper-input-container-input: {
+          font-size: 0.9rem;
+        }
+        --paper-input-container-label: {
+          font-size: 0.9rem;
+        }
+      }
       
       .options {
         padding: 10px 10px 20px;
         margin: 10px 0px;
-        border: 1px solid var(--paper-grey-200);
+        border: 1px solid var(--app-primary-color-light);
         background: #FAFAFA;
       }
 
@@ -30,7 +85,7 @@
 
       .options__option__input--width-smaller {
         --paper-input-container-input: {
-          width: calc(100% - 26px);
+          width: calc(100% - 40px);
         }
       }
           
@@ -68,7 +123,7 @@
           opacity: 0.7;
           min-width: 24px;
         }
-        --iron-icon-fill-color: grey;
+        --iron-icon-fill-color: var(--app-secondary-color);
       }
 
       .dialog {
@@ -123,13 +178,43 @@
 
     <div id="newContainer" class$="content--box [[_computeClassContainer(smallScreen)]]" hidden$="[[loadingDb]]">
 
-      <paper-input
-        label="Title"
-        value="{{item.title}}"
-        id="title"
-        required
-        error-message="Title is required"></paper-input>
-      <paper-textarea label="Description" value="{{item.description}}"></paper-textarea>
+      <div class="main">
+        <div class="main__upload">
+          <input 
+            type="file"
+            id="inputFile"
+            accept="image/*"
+            style="display:none"
+            on-change="_handleFiles" 
+            tabindex="-1"></input>
+          <div class="main__upload__container">
+            <iron-image
+              on-tap="_openFileSelection"
+              class="main__upload__image"
+              fade
+              tabindex="-1"
+              preload placeholder="/images/loading.gif"
+              src="{{item.image}}"
+              sizing="cover"
+              hidden$="[[!item.image]]"></iron-image>
+            <iron-icon
+              icon="add-photo"
+              on-tap="_openFileSelection"
+              class="main__upload__icon"
+              tabindex="-1"
+              hidden$="[[item.image]]"></iron-icon>
+          </div>
+        </div>
+        <div class="main__inputs">
+          <paper-input
+            label="Title"
+            value="{{item.title}}"
+            id="title"
+            required
+            error-message="Title is required"></paper-input>
+          <paper-textarea class="input__description" label="Description" value="{{item.description}}" max-rows="3"></paper-textarea>
+        </div>
+      </div>
       <div id="options" class="options">
         <template is="dom-repeat" items="[[item.options]]" as="option">
           <div id="option[[index]]" class="options__option">
@@ -239,6 +324,8 @@
           <iron-icon icon="info" class="dialog__info-icon"></iron-icon>
         </paper-dialog>
         
+        <polyvote-storage id="st" storage="[[storage]]"></polyvote-storage>
+
         <template is="dom-if" if="[[!edit]]">
           <polyvote-db document id="db" collection="elections" item-id="{{itemId}}" loading="{{loadingDb}}"></polyvote-db>
         </template>
@@ -249,6 +336,11 @@
 </dom-module>
 
 <script>
+  /*function _lala(files) {
+    let numFiles = files.length;
+    console.log(files[numFiles-1]);
+  }*/
+
   (function() {
     'use strict';
 
@@ -347,6 +439,33 @@
       addOption() {
         if (this.item.options)
           this.push('item.options', {"title": "", "votes": 0, "custom": false});
+      },
+
+      /**
+        * Fired when user tap on add photo button
+        */
+      _openFileSelection() {
+        const inputFile = this.$.inputFile;
+        if (inputFile) {
+          inputFile.click();
+        }
+      },
+
+      /**
+        * Fired when user select a file to upload as photo item
+        */
+      _handleFiles(event) {
+        if (event.target.files) {
+          //it has been selected at least one file
+          const files = event.target.files;
+          const numFiles = event.target.files.length;
+          const urlFile = this.$$('#st').uploadFile(files[numFiles-1]);
+          this.addEventListener('file-uploaded', event => {
+            const urlFile = event.detail.url; 
+            this.set('item.image', urlFile);
+            console.log("fileselected", files[numFiles-1], urlFile);
+          });
+        }
       },
 
       _computeHideRemoveButton(index) {
