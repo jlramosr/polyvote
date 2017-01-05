@@ -13,26 +13,95 @@
 
         storage: Object,
 
+        /*
+         * Percent of progress of an action. 
+         */
+        progress: {
+          type: Number,
+          notify: true,
+          value: 0
+        },
+
+        loading: {
+          type: Boolean,
+          notify: true,
+          value: false
+        }
+
       },
 
-      uploadFile(file) {
-        this.uploadUrl = undefined;
+      /**
+        * Upload a file to storage.
+        *
+        * If the process executes successfully, it fires a event with a object with the file url.
+        * ({ "url": <new_url> })
+        *
+        * @param {Object} The file to upload.
+        * @param {String} The type of the field to upload and the root folder where file will save.
+        * @param {Number} The max size of the file in MB.
+        * @param {String} The name of the file.
+        */
+      uploadFile(file, type, maxSize, name) {
+        this.uploadUrl = null;
         const storageRef = this.storage.ref();
-        var uploadTask = storageRef.child('images/' + file.name).put(file);
+        const metadata = {
+          'name': name || file.name,
+          'type': file.type || 'other',
+          'size': file.size || 0,
+        };
+        const mainType = file.type.split('/')[0];
+        if (Boolean(type) && mainType != type) {
+          console.log(`UPLOAD ERROR: FILE SELECTED IS NOT A ${type}/`);
+          return;
+        }
+        if (Boolean(maxSize) && file.size > maxSize * 1000000) {
+          console.log(`UPLOAD ERROR: FILE SELECTED IS TOO LARGE. MAX ${maxSize} bytes`);
+          return;
+        }
+        let uploadTask = storageRef.child(`${mainType}/${metadata.name}`).put(file, metadata);
         // Register three observers:
         // 1. 'state_changed' observer, called any time the state changes
         // 2. Error observer, called on failure
         // 3. Completion observer, called on successful completion
         uploadTask.on('state_changed', snapshot => {
           // Observe state change events such as progress, pause, and resume
+         this.progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+         this.loading = true;
+         switch (snapshot.state) {
+          case firebase.storage.TaskState.PAUSED: // or 'paused'
+            console.log('Upload is paused');
+            break;
+          case firebase.storage.TaskState.PROGRESS: // or 'progress'
+            console.log('Upload is progressing', this.progress);
+            break;
+          case firebase.storage.TaskState.RUNNING: // or 'running'
+            console.log('Upload is running', this.progress);
+            break;
+          }
         }, error => {
-          console.log("UPLOAD ERROR");
+          switch (error.code) {
+            case 'storage/unauthorized':
+              console.log("UPLOAD ERROR: User doesn't have permission to access the object");
+              break;
+            case 'storage/canceled':
+              console.log("UPLOAD ERROR: User canceled the upload");
+              break;
+            case 'storage/unknown':
+              console.log("UPLOAD ERROR: Unknown error occurred", error.serverResponse);
+              break;
+          }      
         }, _ => {
           // Handle successful uploads on complete
           // For instance, get the download URL: https://firebasestorage.googleapis.com/...
           const uploadUrl = uploadTask.snapshot.downloadURL;
-          this.fire('file-uploaded', { "url": uploadUrl })
+          this.fire('file-uploaded', { "url": uploadUrl });
+          this.progress = 0;
+          this.loading = false;
         });
+      },
+
+      deleteFile(urlFile) {
+
       }
       
     });

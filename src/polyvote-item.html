@@ -16,6 +16,12 @@
       :host {
         display: block;
       }
+
+      .item__detail {
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+      }
+
     </style>
 
     <app-route
@@ -28,10 +34,18 @@
     <paper-spinner class="spinner" active="[[loadingDb]]"></paper-spinner>
 
     <div class$="content--box [[_computeClassContainer(smallScreen)]]">
-    
-      <p id="description" class="description" hidden$="[[_isEditAction(action)]]">
-        {{item.description}}
-      </p>
+
+      <div class="item__detail" hidden$="[[_isEditAction(action)]]">
+        <iron-image
+          class="image"
+          fade
+          src="[[item.image]]"
+          sizing="cover"
+          hidden$="[[!item.image]]"></iron-image>
+        <p id="description" class="description">
+          {{item.description}}
+        </p>
+      </div>
 
       <iron-pages
         selected="[[action]]"

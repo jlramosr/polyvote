@@ -14,6 +14,9 @@
         --app-secondary-color-soft: var(--paper-orange-300);
         --app-error-color: var(--paper-pink-400);
         --error-color: var(--app-error-color);
+        --app-image-width: 94px;
+        --app-image-width-tablet: 98px;
+        --app-image-width-desktop: 128px;
         --app-general-padding: 16px;
         --app-general-padding-tablet: 140px;
         --app-general-padding-desktop: 280px;
@@ -43,9 +46,17 @@
       }
 
       .description {
-        font-size: 12px;
-        font-style: italic;
-        color: #666;
+        font-size: 14px;
+        color: #444;
+      }
+
+      .image {
+        width: var(--app-image-width);
+        height: var(--app-image-width);
+        background: #EEE;
+        /*background-image: url('../images/add-photo.png');
+        background-size: var(--app-image-width) var(--app-image-width);*/
+        border-radius: 50%;
       }
 
       .content--box {
@@ -125,6 +136,26 @@
 
       a {
         text-decoration: none;
+      }
+
+            /* Tablets */
+      @media (min-width: 840px) {
+        .image {
+          width: var(--app-image-width-tablet);
+          height: var(--app-image-width-tablet);
+          background-size: var(--app-image-width-tablet) var(--app-image-width-tablet);
+          padding-top: 6px;
+        }
+      }
+
+      /* Desktops */
+      @media (min-width: 1260px) {
+        .image {
+          width: var(--app-image-width-desktop);
+          height: var(--app-image-width-desktop);
+          background-size: var(--app-image-width-desktop) var(--app-image-width-desktop);
+          padding-top: 0;
+        }
       }
 
     </style>
