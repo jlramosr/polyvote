@@ -4,6 +4,8 @@
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 
+<link rel="import" href="polyvote-image-upload.html">
+
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="polyvote-new">
@@ -24,60 +26,8 @@
       }
 
       .main__upload {
-        @apply(--layout-vertical);
-        @apply(--layout-center-center);
         margin: auto;
         padding-top: 10px;
-      }
-
-      .main__upload__container {
-        @apply(--layout-vertical);
-        @apply(--layout-center-center);
-        cursor: pointer;
-        outline: none;
-        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-      }
-
-      .main__upload__container:hover {
-        opacity: 0.3;
-      }
-
-      .main__upload__image {
-        --iron-image-width: 100%;
-        --iron-image-height:: 100%;
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        outline: none;
-        opacity: 0.8; 
-      }
-
-      .main__upload__icon {
-        --iron-icon-width: 50%;
-        --iron-icon-height: 50%;
-        --iron-icon-fill-color: var(--app-secondary-color);
-        opacity: 0.4;
-        outline: none;
-      }
-
-      .main__upload__progress {
-        width: 100%;
-        margin-top: 6px;
-        --paper-progress-transition-duration: 0.0008s;
-        --paper-progress-transition-timing-function: ease;
-        --paper-progress-transition-transition-delay: 0s;
-      }
-
-      .main__upload__button {
-        border: 1px solid var(--app-primary-color);
-        font-size: 10px;
-        color: var(--app-primary-color);
-        margin: 6px auto;
-        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-      }
-
-      .main__upload__button:hover {
-        background: var(--app-primary-color-light);
       }
 
       .input__description {
@@ -195,45 +145,11 @@
       }
     </style>
 
-    <paper-spinner class="spinner" active="[[loadingDatabase]]"></paper-spinner>
-
-    <div id="newContainer" class$="content--box [[_computeClassContainer(smallScreen)]]" hidden$="[[loadingDatabase]]">
+    <div id="newContainer" class$="content--box [[_computeClassContainer(smallScreen)]]">
 
       <div class="main">
         <div class="main__upload">
-          <input 
-            type="file"
-            id="inputFile"
-            accept="image/*"
-            style="display:none"
-            on-change="_handleFiles" 
-            tabindex="-1"></input>
-          <div class="image main__upload__container">
-            <iron-image
-              on-tap="_openFileSelectionTapped"
-              class="main__upload__image"
-              fade
-              tabindex="-1"
-              preload placeholder="/images/loading.gif"
-              src="{{item.image}}"
-              sizing="cover"
-              hidden$="[[!item.image]]"></iron-image>
-            <!--<iron-image
-              class="main__upload__image"
-              src="/images/loading.gif"
-              sizing="cover"
-              hidden$="[[!loadingStorage]]"></iron-image>-->
-            <iron-icon
-              icon="add-photo"
-              on-tap="_openFileSelectionTapped"
-              class="main__upload__icon"
-              tabindex="-1"
-              hidden$="[[item.image]]"></iron-icon>
-          </div>
-          <!--<paper-progress class="main__upload__progress" value="{{progressStorage}}"></paper-progress>-->
-          <paper-button class="main__upload__button" on-tap="_deleteImageTapped" hidden$="[[!item.image]]">
-            Delete image
-          </paper-button>
+          <polyvote-image-upload load-complete="[[loadComplete]]" storage="[[storage]]" image="{{item.image}}"></polyvote-image-upload>
         </div>
         <div class="main__inputs">
           <paper-input
@@ -242,7 +158,7 @@
             id="title"
             required
             error-message="Title is required"></paper-input>
-          <paper-textarea class="input__description" label="Description" value="{{item.description}}" max-rows="3"></paper-textarea>
+          <paper-textarea class="input__description" label="Description" value="{{item.description}}" rows="1" max-rows="3"></paper-textarea>
         </div>
       </div>
       <div id="options" class="options">
@@ -353,8 +269,6 @@
             dialog-confirm autofocus>OK</paper-button>
           <iron-icon icon="info" class="dialog__info-icon"></iron-icon>
         </paper-dialog>
-        
-        <polyvote-storage id="st" storage="[[storage]]" progress="{{progressStorage}}" loading="{{loadingStorage}}"></polyvote-storage>
 
         <template is="dom-if" if="[[!edit]]">
           <polyvote-db document id="db" collection="elections" item-id="{{itemId}}" loading="{{loadingDatabase}}"></polyvote-db>
@@ -411,10 +325,6 @@
 
         loadingDatabase: Boolean,
 
-        loadingStorage: Boolean,
-
-        progressStorage: Number,
-
         /**
           * To solve call value-changed twice due to Paper and Input Behaviour
           * https://github.com/PolymerElements/paper-input/issues/66
@@ -452,6 +362,7 @@
           "options": [],
           "custom": false,
           "multiple": false,
+          "image": null,
           "chars": false
         };
         this.$.title.invalid = false;

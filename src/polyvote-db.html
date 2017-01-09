@@ -63,7 +63,8 @@
           */
         documentData: {
           type: Object,
-          notify: true
+          notify: true,
+          observer: '_documentDataChanged'
         },
 
         /**
@@ -86,6 +87,10 @@
         if (_document) {
           this.$.documentTemplate.render();
         }
+      },
+
+      _documentDataChanged(documentData, oldDocumentData) {
+        console.log("_documentDataChanged", documentData, oldDocumentData);
       },
 
       getItem() {

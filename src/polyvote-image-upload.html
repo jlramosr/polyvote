@@ -1,0 +1,232 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="polyvote-image-upload">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+        position: relative;
+      }
+
+      .container {
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+        position: relative;
+        cursor: pointer;
+        outline: none;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      .container:hover {
+        opacity: 0.3;
+      }
+
+      .loading {
+        --paper-spinner-stroke-width: 2px;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+      }
+
+      .photo {
+        --iron-image-width: 100%;
+        --iron-image-height: 100%;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        outline: none;
+        opacity: 0.8; 
+      }
+
+      .icon {
+        --iron-icon-fill-color: var(--app-secondary-color);
+        opacity: 0.4;
+        cursor: pointer;
+        outline: none;
+      }
+
+      .icon--add {
+        --iron-icon-width: 50%;
+        --iron-icon-height: 50%;
+      }
+
+      .icon--delete {
+        --iron-icon-width: 20px;
+        --iron-icon-height: 20px;
+        display: none;
+        position: absolute;
+        bottom: -5px;
+        right: -5px;
+      }
+    </style>
+
+    
+
+    <input 
+      type="file"
+      id="inputFile"
+      accept="image/*"
+      style="display:none"
+      on-change="_handleFiles" 
+      tabindex="-1"></input>
+    <div class="container image">
+      <iron-image
+        on-tap="_openFileSelectionTapped"
+        class="photo"
+        loaded="{{imageLoaded}}"
+        src="{{image}}"
+        sizing="cover"
+        hidden$="[[!_showImage(loading, image)]]"></iron-image>
+      <iron-icon
+        icon="add-photo"
+        on-tap="_openFileSelectionTapped"
+        class="icon icon--add"
+        hidden$="[[!_showAddImage(loading, image)]]"></iron-icon>
+      <paper-spinner class="loading" active="[[showLoading]]" on-tap="_openFileSelectionTapped"></paper-spinner>
+    </div>
+    <iron-icon
+      icon="delete"
+      class="icon icon--delete"
+      id="deleteImageButton"
+      on-tap="_deleteImageTapped"></iron-icon>
+
+    <template is="dom-if" if="[[loadComplete]]">
+
+      <polyvote-storage id="st" storage="[[storage]]" progress="{{progress}}" loading="{{loading}}"></polyvote-storage>
+
+      <paper-tooltip
+        for="deleteImageButton" 
+        offset="5">Delete image</paper-tooltip>
+
+    </template>
+
+  </template>
+</dom-module>
+
+<script>
+  (function() {
+    'use strict';
+
+    Polymer({
+
+      is: 'polyvote-image-upload',
+
+      properties: {
+
+        image: {
+          type: String,
+          value: null,
+          notify: true
+        },
+
+        loading: {
+          type: Boolean,
+          observer: '_loadingChanged'
+        },
+
+        progress: Number,
+
+        imageLoaded: {
+          type: Boolean,
+          observer: '_imageLoadedChanged'
+        },
+
+        showLoading: {
+          type: Boolean,
+          value: false
+        },
+
+        loadComplete: Boolean
+
+      },
+
+      /**
+        * Fired when user tap on add photo button
+        */
+      _openFileSelectionTapped() {
+        const inputFile = this.$.inputFile;
+        if (inputFile) {
+          inputFile.click();
+        }
+      },
+
+      /**
+        * Fired when user select a file to upload as photo.
+        *
+        * Add url string to image property.
+        */
+      _handleFiles(event) {
+        if (event.target.files) {
+          //it has been selected at least one file
+          const files = event.target.files;
+          const numFiles = event.target.files.length;
+          const urlFile = this.$$('#st').uploadFile(files[numFiles-1], 'image', 1, files[numFiles-1].name);
+          this.addEventListener('file-uploaded', event => {
+            const urlFile = event.detail.url; 
+            this.set('image', urlFile);
+          });
+        }
+      },
+
+      /**
+        * Fired when user delete image.
+        *
+        * Delete url string from image property.
+        */
+      _deleteImageTapped() {
+        this.$$('#st').deleteFile(this.image);
+        this.set('image', null);
+      },
+
+      /**
+        * Fired when loading image value changes.
+        *
+        * Show loading progress.
+        *
+        * @param {Boolean} True when image is loading, false in other case.
+        */
+      _loadingChanged(loading) {
+        if (loading) {
+          this.showLoading = true;
+        }
+      },
+
+      /**
+        * Fired when indicator of image loaded changes.
+        *
+        * If the image is loaded succesfully, remove progress indicator and show delete image button.
+        * If the image is not loaded, remove delete image button.
+        *
+        * @param {Boolean} True when image is loaded, false in other case.
+        */
+      _imageLoadedChanged(imageLoaded) {
+        console.log("imageLoaded", imageLoaded);
+        if (imageLoaded) {
+          if (this.showLoading)
+            this.showLoading = false;
+          this.$.deleteImageButton.style.display='block';
+        }
+        else {
+          this.$.deleteImageButton.style.display='none';
+        }
+      },
+
+      _showImage(loading, image) {
+        return !loading && image;
+      },
+
+      _showAddImage(loading, image) {
+        return !loading && !image;
+      }
+      
+    });
+
+  })();
+</script>

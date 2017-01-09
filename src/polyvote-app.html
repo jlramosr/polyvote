@@ -273,7 +273,7 @@
 
     </style>
 
-    <polyvote-core storage="{{storage}}" database="{{database}}"></polyvote-core>
+    <polyvote-core database="{{database}}" storage="{{storage}}"></polyvote-core>
     
     <app-location route="{{route}}" path="{{path}}"></app-location>
     <app-route
@@ -306,17 +306,11 @@
               </a>
             </iron-selector>
             <div class="drawer__social">
-              <a
-                href="https://twitter.com/jlramosromero"
-                target="_blank" 
-                class="drawer__link drawer__link--social" 
+              <a href="https://twitter.com/jlramosromero" target="_blank" class="drawer__link drawer__link--social" 
                 on-tap="_closeDrawer">  
                 <iron-icon icon="twitter" class="drawer__social__icon"></iron-icon>
               </a>
-              <a
-                href="https://www.facebook.com/futbolypensamiento"
-                target="_blank"
-                class="drawer__link drawer__link--social"
+              <a href="https://www.facebook.com/futbolypensamiento" target="_blank" class="drawer__link drawer__link--social"
                 on-tap="_closeDrawer">  
                 <iron-icon icon="facebook" class="drawer__social__icon"></iron-icon>
               </a>
@@ -330,11 +324,8 @@
         <app-header fixed>
 
           <app-toolbar class$="toolbar [[_computeBackgroundToolbar(page)]] main__toolbar">
-            <paper-icon-button 
-              icon="back" 
-              hidden$="[[!backPage]]"
-              on-tap="_backTapped"
-              class="main__button--default main__button--back"></paper-icon-button>
+            <paper-icon-button icon="[[_getIconBackPage(page, itemInfo.action)]]" on-tap="_backTapped"
+              hidden$="[[!backPage]]" class="main__button--default main__button--back"></paper-icon-button>
             <div class="main__title-content">
               <div class="main__title-content__title" main-title>
                 <template is="dom-if" if="[[_shouldRenderBigScreen]]">
@@ -344,44 +335,40 @@
               </div>
             </div>
             <div class="main__button--position-right">
-              <a
-                href="/item/[[itemInfo.id]]/"
-                class="main__href" 
+              <a href="/item/[[itemInfo.id]]/" class="main__href" 
                 hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'view', 'toolbar', itemInfo.id)]]">
                 <iron-icon icon="checks" class="main__button--default"></iron-icon>
               </a>
-              <a
-                href="/item/[[itemInfo.id]]/results/"
-                class="main__href"
+              <a href="/item/[[itemInfo.id]]/results/" class="main__href"
                 hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'results', 'toolbar', itemInfo.id)]]">
                 <iron-icon icon="timeline" class="main__button--default"></iron-icon>
               </a>
-              <a
-                href="/item/[[itemInfo.id]]/edit/"
-                class="main__href"
+              <a href="/item/[[itemInfo.id]]/edit/" class="main__href"
                 hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'edit', 'toolbar', itemInfo.id)]]">
                 <iron-icon icon="edit" class="main__button--default"></iron-icon>
               </a>
-              <a
-                href="/new/"
-                class="main__href"
+              <a href="" class="main__href" 
+                hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'save', 'toolbar', itemInfo.id)]]">
+                <iron-icon icon="check-circle" class="main__button--default"></iron-icon>
+              </a>
+              <a href="/new/" class="main__href"
                 hidden$="[[_computeHideAction(page, smallScreen, '', 'new', 'toolbar')]]">
                 <iron-icon icon="add" class="main__button--default"></iron-icon>
               </a>
-              <paper-icon-button icon="menu" class="main__button--default" drawer-toggle></paper-icon-button>
-              <a
-                href="https://twitter.com/jlramosromero"
-                target="_blank"
-                class="main__href"
+              <a href="" class="main__href" 
+                hidden$="[[_computeHideAction(page, smallScreen, '', 'create', 'toolbar')]]">
+                <iron-icon icon="send" class="main__button--default"></iron-icon>
+              </a>
+              <a href="https://twitter.com/jlramosromero" target="_blank" class="main__href" 
                 hidden$="[[smallScreen]]">  
                 <iron-icon icon="twitter" class="main__button--social"></iron-icon>
               </a>
-              <a href="https://www.facebook.com/futbolypensamiento"
-                target="_blank"
-                class="main__href"
+              <a href="https://www.facebook.com/futbolypensamiento" target="_blank" class="main__href" 
                 hidden$="[[smallScreen]]">  
                 <iron-icon icon="facebook" class="main__button--social"></iron-icon>
               </a>
+              <paper-icon-button icon="menu" class="main__button--default" drawer-toggle 
+                hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'menu', 'toolbar', itemInfo.id)]]"></paper-icon-button>
             </div>
           </app-toolbar>
 
@@ -390,39 +377,24 @@
             <div class="main__menu">
               <div class="main__menu__title">{{menuHeader}}</div>
               <div class="main__menu__tabs">
-                <a
-                  href="/item/[[itemInfo.id]]"
-                  class="main__menu__tab"
+                <a href="/item/[[itemInfo.id]]" class="main__menu__tab"
                   hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'view', 'menu', itemInfo.id)]]">
-                  <iron-icon icon="checks" class="main__menu__icon"></iron-icon>
-                  Vote
+                  <iron-icon icon="checks" class="main__menu__icon"></iron-icon>Vote
                 </a>
-                <a
-                  href="/item/[[itemInfo.id]]/results"
-                  class="main__menu__tab"
+                <a href="/item/[[itemInfo.id]]/results" class="main__menu__tab"
                   hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'results', 'menu', itemInfo.id)]]">
-                  <iron-icon icon="timeline" class="main__menu__icon"></iron-icon>
-                  Results
+                  <iron-icon icon="timeline" class="main__menu__icon"></iron-icon>Results
                 </a>
-                <a
-                  href="/item/[[itemInfo.id]]/edit"
-                  class="main__menu__tab"
+                <a href="/item/[[itemInfo.id]]/edit" class="main__menu__tab"
                   hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'edit', 'menu', itemInfo.id)]]">
-                  <iron-icon icon="edit" class="main__menu__icon"></iron-icon>
-                  Edit
+                  <iron-icon icon="edit" class="main__menu__icon"></iron-icon>Edit
                 </a>
-                <a
-                  href="/new/"
-                  title="New Election"
-                  class="main__menu__tab"
+                <a href="/new/" title="New Election" class="main__menu__tab"
                   hidden$="[[_computeHideAction(page, smallScreen, '', 'new', 'menu', itemInfo.id)]]">
                   <iron-icon icon="add" class="main__menu__icon"></iron-icon>
                   <span hidden$="[[_isItemPage(page)]]">New Election</span>
                 </a>
-                <a
-                  href="/list/"
-                  title="Election List"
-                  class="main__menu__tab"
+                <a href="/list/" title="Election List" class="main__menu__tab"
                   hidden$="[[_computeHideAction(page, smallScreen, '', 'list', 'menu', itemInfo.id)]]">
                   <iron-icon icon="list" class="main__menu__icon"></iron-icon>
                   <span hidden$="[[_isItemPage(page)]]">Election List</span>
@@ -598,27 +570,23 @@
         *
         * It completes headers and back page.
         */
-      _pageItemChanged(page, itemTitle, itemId, itemBackPage, smallScreen) {
+      _pageItemChanged(page, itemTitle, _itemId, itemBackPage, smallScreen) {
         let header = '';
         let back = '';
         if (page == 'list') {
-          header = 'Elections';
-          itemId = '';
+          header = 'Elections';     
         }
         if (page == 'new') {
           header = 'New Election';
-          back = 'home/'
-          itemId = '';
+          back = 'home/' 
         }
         if (page == 'item') {
           header = itemTitle;
           back = itemBackPage;
-          itemId = itemId;
         }
         if (page == 'e404') {
           header = '404 ERROR';
-          back = 'home/';
-          itemId = '';
+          back = 'home/'; 
         }
         if (smallScreen) {
           // small screens
@@ -667,15 +635,21 @@
           // toolbar
           if (!smallScreen) return true;
           if (page == 'item') {
-            if (action == 'edit')
+            if (action == 'edit') {
+              if (actionButton != 'save') 
+                return true;
+            }
+            else if (action == actionButton || actionButton == 'new' || actionButton == 'save' || !itemId) {
               return true;
-            if (action == actionButton || actionButton == 'new' || !itemId)
-              return true;
+            }
           }
-          if (page == 'list' && actionButton != 'new') {
+          if (page == 'list' && actionButton != 'new' && actionButton != 'menu') {
             return true;
           }
-          if (page == 'new' || page == 'e404') {
+          if (page == 'new' && actionButton != 'create') {
+            return true;
+          }
+          if (page == 'e404') {
             return true;
           }
           return false;
@@ -783,6 +757,13 @@
 
       _computeShouldRenderBigScreen(smallScreen, loadComplete) {
         return !smallScreen && loadComplete;
+      },
+
+      _getIconBackPage(page, action) {
+        if (page == 'new' || (page == 'item' && action == 'edit')) {
+          return 'close';
+        }
+        return 'back';
       }
 
     });

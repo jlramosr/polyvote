@@ -30,8 +30,8 @@
       data="{{routeData}}"
       tail="{{subroute}}"></app-route>
 
-    <polyvote-db document id="db" collection="elections" document-data="{{item}}" item-id="{{itemId}}" loading="{{loadingDb}}"></polyvote-db>
-    <paper-spinner class="spinner" active="[[loadingDb]]"></paper-spinner>
+    <polyvote-db document id="db" collection="elections" document-data="{{item}}" item-id="{{itemId}}" loading="{{loadingDatabase}}"></polyvote-db>
+    <paper-spinner class="spinner" active="[[loadingDatabase]]"></paper-spinner>
 
     <div class$="content--box [[_computeClassContainer(smallScreen)]]">
 
@@ -126,7 +126,7 @@
 
         smallScreen: Boolean,
 
-        loadingDb: Boolean,
+        loadingDatabase: Boolean,
 
         loadComplete: Boolean,
         
@@ -186,7 +186,7 @@
        * It's the pages handle
        */
       _itemActionChanged(item, itemId, action) {
-        this.loadingDb = true;
+        this.loadingDatabase = true;
         if (action != null) {
           // if there is no itemId, show the list of all items
           if (!Boolean(itemId)) {
@@ -202,14 +202,14 @@
           if (!this._emptyObject(item)) {
             const resolvedActionUrl = this.resolveUrl(`polyvote-item-${action}.html`);
             this.importHref(resolvedActionUrl, this._actionLoaded, this._actionErrorLoaded, true);
-            this.loadingDb = false;
+            this.loadingDatabase = false;
           }
           else if (this.oldRoute.path != "/list/") {
             setTimeout(_ => {
               if (this._emptyObject(this.item)) {
                 this._itemErrorLoaded();
               }
-              this.loadingDb = false;
+              this.loadingDatabase = false;
             }, 5000);       
           }
         }
@@ -227,7 +227,7 @@
         const pageLoaded = this.$$(`polyvote-item-${this.action}`);
         this.set('itemInfo.id', this.itemId);
         if (this.action == 'edit') {
-          this.set('itemInfo.backPage', '');
+          this.set('itemInfo.backPage', `item/${this.itemInfo.id}/`);
           this.set('itemInfo.title', `${this.item.title} edit`);
         }
         else if (this.action == 'results') { 
