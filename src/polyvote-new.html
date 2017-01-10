@@ -381,37 +381,6 @@
           this.push('item.options', {"title": "", "votes": 0, "custom": false});
       },
 
-      /**
-        * Fired when user tap on add photo button
-        */
-      _openFileSelectionTapped() {
-        const inputFile = this.$.inputFile;
-        if (inputFile) {
-          inputFile.click();
-        }
-      },
-
-      /**
-        * Fired when user select a file to upload as photo item
-        */
-      _handleFiles(event) {
-        if (event.target.files) {
-          //it has been selected at least one file
-          const files = event.target.files;
-          const numFiles = event.target.files.length;
-          const urlFile = this.$$('#st').uploadFile(files[numFiles-1], 'image', 1, files[numFiles-1].name);
-          this.addEventListener('file-uploaded', event => {
-            const urlFile = event.detail.url; 
-            this.set('item.image', urlFile);
-          });
-        }
-      },
-
-      _deleteImageTapped() {
-        this.$$('#st').deleteFile(this.item.image);
-        this.set('item.image', null);
-      },
-
       _computeHideRemoveButton(index) {
         if (index < this.optionsRequired || !this.item.options[index].title)
           return true;

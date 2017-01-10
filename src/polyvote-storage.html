@@ -55,7 +55,7 @@
           return;
         }
         if (Boolean(maxSize) && file.size > maxSize * 1000000) {
-          console.log(`UPLOAD ERROR: FILE SELECTED IS TOO LARGE. MAX ${maxSize} bytes`);
+          console.log(`UPLOAD ERROR: FILE SELECTED IS TOO LARGE. MAX ${maxSize} MBs`);
           return;
         }
         let uploadTask = storageRef.child(`${mainType}/${metadata.name}`).put(file, metadata);
