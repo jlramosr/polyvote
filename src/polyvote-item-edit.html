@@ -16,6 +16,7 @@
 
     <polyvote-new
       edit
+      small-screen="{{smallScreen}}"
       item="[[itemClone]]"
       storage="{{storage}}" 
       load-complete="{{loadComplete}}"></polyvote-new>
@@ -39,6 +40,8 @@
 
           itemClone: Object,
 
+          smallScreen: Boolean,
+
           loadComplete: Boolean,
 
           route: String
@@ -47,6 +50,10 @@
 
         addOption() {
           this.$$('polyvote-new').addOption();
+        },
+
+        saveItem() {
+          this.$$('polyvote-new').saveItem();
         },
 
         clear() {

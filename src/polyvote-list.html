@@ -91,7 +91,7 @@
 
     <div id="content" class="content--list">
 
-      <iron-list items="[[items]]">
+      <iron-list items="[[_filterItems(items.splices, searchText, sortMode)]]">
         <template>
           <div class$="item [[_computeItemClass(index, items.length)]]" on-tap="_itemTapped" tabindex$="[[tabIndex]]">
             <iron-image class="item__image" sizing="cover" src="[[item.image]]"></iron-image>
@@ -155,7 +155,23 @@
 
       loadingDb: Boolean,
 
-      loadComplete: Boolean
+      loadComplete: Boolean,
+
+      searchText: {
+        type: String,
+        value: ''
+      },
+
+      /*
+       * Sort container mode of the list.
+       *
+       * 0: none, 1: descendent, 2: ascendent.
+       */
+      sortMode: {
+        type: Number,
+        value: 0
+      }
+
     },
 
     listeners: {
@@ -170,6 +186,23 @@
       if (index == itemsLength - 1) {
         return 'item--last-child';
       }
+    },
+
+    _filterItems(itemsChanges, searchText, sortMode) {
+      const _searchText = searchText.toUpperCase();
+      //toUpperCase() due to includes is case-sensitive
+      // descendant order
+      return this.items
+        .filter(item => {
+          const _itemTitle = item.title.toUpperCase();
+          const _itemDescription = item.description.toUpperCase();
+          return _itemTitle.includes(_searchText) || _itemDescription.includes(_searchText);
+        })
+        .sort((item1, item2) => {
+          if (!Boolean(sortMode)) return sortMode; // no order
+          if (item1.title > item2.title) return sortMode; 
+          return -1*sortMode; // -1: ascendent, 1: descendent
+        });
     },
 
     _itemMenuTapped(event) {

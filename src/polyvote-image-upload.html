@@ -1,5 +1,4 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
 <link rel="import" href="shared-styles.html">
 
@@ -41,7 +40,6 @@
         width: 100%;
         height: 100%;
         border-radius: 50%;
-        outline: none;
         opacity: 0.8; 
       }
 
@@ -77,19 +75,21 @@
       on-change="_handleFiles" 
       tabindex="-1"></input>
     <div class="container image">
-      <iron-image
-        on-tap="_openFileSelectionTapped"
-        class="photo"
-        loaded="{{imageLoaded}}"
-        src="{{image}}"
-        sizing="cover"
-        hidden$="[[!_showImage(loading, image)]]"></iron-image>
-      <iron-icon
-        icon="add-photo"
-        on-tap="_openFileSelectionTapped"
-        class="icon icon--add"
-        hidden$="[[!_showAddImage(loading, image)]]"></iron-icon>
-      <paper-spinner class="loading" active="[[showLoading]]" on-tap="_openFileSelectionTapped"></paper-spinner>
+        <iron-image
+          on-tap="_openFileSelectionTapped"
+          class="photo"
+          loaded="{{imageLoaded}}"
+          src="{{image}}"
+          sizing="cover"
+          hidden$="[[!_computeShowImage(loading, image)]]"></iron-image>
+      <template is="dom-if" if="[[loadComplete]]">
+        <iron-icon
+          icon="add-photo"
+          on-tap="_openFileSelectionTapped"
+          class="icon icon--add"
+          hidden$="[[!_computeShowAddImage(loading, image)]]"></iron-icon>
+        <paper-spinner class="loading" active="[[showLoading]]" on-tap="_openFileSelectionTapped"></paper-spinner>
+      </template>
     </div>
     <iron-icon
       icon="delete"
@@ -207,7 +207,6 @@
         * @param {Boolean} True when image is loaded, false in other case.
         */
       _imageLoadedChanged(imageLoaded) {
-        console.log("imageLoaded", imageLoaded);
         if (imageLoaded) {
           if (this.showLoading)
             this.showLoading = false;
@@ -218,11 +217,11 @@
         }
       },
 
-      _showImage(loading, image) {
+      _computeShowImage(loading, image) {
         return !loading && image;
       },
 
-      _showAddImage(loading, image) {
+      _computeShowAddImage(loading, image) {
         return !loading && !image;
       }
       

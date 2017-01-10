@@ -35,17 +35,18 @@
 
     <div class$="content--box [[_computeClassContainer(smallScreen)]]">
 
-      <div class="item__detail" hidden$="[[_isEditAction(action)]]">
-        <iron-image
-          class="image"
-          fade
-          src="[[item.image]]"
-          sizing="cover"
-          hidden$="[[!item.image]]"></iron-image>
-        <p id="description" class="description">
-          {{item.description}}
-        </p>
-      </div>
+      <template is="dom-if" if="[[_showItemDetail(action)]]">
+        <div class="item__detail">
+          <iron-image
+            class="image"
+            src="[[item.image]]"
+            sizing="cover"
+            hidden$="[[!item.image]]"></iron-image>
+          <p id="description" class="description">
+            {{item.description}}
+          </p>
+        </div>
+      </template>
 
       <iron-pages
         selected="[[action]]"
@@ -59,6 +60,7 @@
 
         <polyvote-item-edit
           name="edit"
+          small-screen="{{smallScreen}}"
           storage="{{storage}}" 
           item-id="[[itemId]]"
           item="[[item]]"
@@ -148,8 +150,12 @@
         this.$$('polyvote-item-edit').clear();
       },
 
-      _isEditAction(action) {
-        return action == 'edit';
+      saveItem() {
+        this.$$('polyvote-item-edit').saveItem();
+      },
+
+      _showItemDetail(action) {
+        return action != 'edit';
       },
 
       /*
@@ -253,7 +259,6 @@
         this.$.db.updateItem(event.detail);
         this.set('routeData.action', 'view');
       },
-
           
       _resetItem(event) {
         this.clearEditView();

@@ -52,6 +52,28 @@
         color: #fff;
       }
 
+      .main__input {
+        @apply(--layout-flex);
+        font-size: 16px;
+        margin-right: -18px !important;
+        padding: 12px 8px;
+        border: none;
+        background-color: #eee;
+        color: var(--app-primary-color);
+        -webkit-appearance: none;
+        border-radius: 2px;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      .main__input:hover {
+        background-color: #fff;
+      }
+
+      .main__input:focus {
+        outline: none;
+        background-color: #fff;
+      }
+
       .main__title-content {
         @apply(--layout-horizontal);
         margin-left: 8px;
@@ -68,9 +90,10 @@
         text-overflow: ellipsis;
       }
 
-      .main__button--default {
+      .main__button {
         min-width: 40px;
         margin: 8px 0;
+        border-radius: 0;
       }
 
       .main__button--social {
@@ -84,13 +107,32 @@
         margin: 0 -8px;
       }
 
+      .main__button--search {
+        margin: 1px 0 0;
+      }
+
+      .main__button--active {
+        background: var(--app-primary-color-soft);
+        border-radius: 50%;
+        margin-right: 4px;
+      }
+
+      .main__button--reverse {
+        -moz-transform: scaleY(-1);
+        -o-transform: scaleY(-1);
+        -webkit-transform: scaleY(-1);
+        transform: scaleY(-1);
+        filter: FlipV;
+        -ms-filter: "FlipV";
+      }
+
       .main__title__icon {
         margin-right: 8px;
       }
 
       .main__button--position-right {
         @apply(--layout-horizontal);
-        @apply(--layout-center);
+        @apply(--layout-center-center);
         margin-left: auto;
       }
 
@@ -324,52 +366,73 @@
         <app-header fixed>
 
           <app-toolbar class$="toolbar [[_computeBackgroundToolbar(page)]] main__toolbar">
+
+            <input id="searchInput" class="main__input" type="search" placeholder="Search" value="{{searchText::input}}" hidden></input>
+
             <paper-icon-button icon="[[_getIconBackPage(page, itemInfo.action)]]" on-tap="_backTapped"
-              hidden$="[[!backPage]]" class="main__button--default main__button--back"></paper-icon-button>
+              hidden$="[[!backPage]]" class="main__button main__button--back"></paper-icon-button>
+
             <div class="main__title-content">
               <div class="main__title-content__title" main-title>
                 <template is="dom-if" if="[[_shouldRenderBigScreen]]">
                   <iron-image src="/images/manifest/icon-24x24.png" class="main__title__icon"></iron-image>
                 </template>
-                {{header}}
+                <span hidden$="[[searchActive]]">{{header}}</span>
               </div>
             </div>
+
             <div class="main__button--position-right">
-              <a href="/item/[[itemInfo.id]]/" class="main__href" 
-                hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'view', 'toolbar', itemInfo.id)]]">
-                <iron-icon icon="checks" class="main__button--default"></iron-icon>
+
+              <paper-icon-button icon="search" class$="main__button main__button--search [[_computeSearchIconClass(searchActive)]]" 
+                on-tap="_searchTapped" hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, '', 'search')]]"></paper-icon-button>
+
+              <paper-icon-button icon="close" class$="main__button" on-tap="_closeSearchTapped"
+                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, '', 'close-search')]]"></paper-icon-button>
+
+              <paper-icon-button icon="sort" class$="main__button [[_computeSortIconClass(sortMode)]]" 
+                on-tap="_sortTapped" hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, '', 'sort')]]"></paper-icon-button>
+
+              <a href="/item/[[itemInfo.id]]/" class="main__href"
+                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, itemInfo.action, 'view', itemInfo.id)]]">
+                <iron-icon icon="gavel" class="main__button"></iron-icon>
               </a>
+
               <a href="/item/[[itemInfo.id]]/results/" class="main__href"
-                hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'results', 'toolbar', itemInfo.id)]]">
-                <iron-icon icon="timeline" class="main__button--default"></iron-icon>
+                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, itemInfo.action, 'results', itemInfo.id)]]">
+                <iron-icon icon="timeline" class="main__button"></iron-icon>
               </a>
+
               <a href="/item/[[itemInfo.id]]/edit/" class="main__href"
-                hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'edit', 'toolbar', itemInfo.id)]]">
-                <iron-icon icon="edit" class="main__button--default"></iron-icon>
+                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, itemInfo.action, 'edit', itemInfo.id)]]">
+                <iron-icon icon="edit" class="main__button"></iron-icon>
               </a>
-              <a href="" class="main__href" 
-                hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'save', 'toolbar', itemInfo.id)]]">
-                <iron-icon icon="check-circle" class="main__button--default"></iron-icon>
-              </a>
+
+              <paper-icon-button icon="done" class="main__button" on-tap="_saveItemTapped"
+                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, itemInfo.action, 'save', itemInfo.id)]]"></paper-icon-button>
+
               <a href="/new/" class="main__href"
-                hidden$="[[_computeHideAction(page, smallScreen, '', 'new', 'toolbar')]]">
-                <iron-icon icon="add" class="main__button--default"></iron-icon>
+                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, '', 'new')]]">
+                <iron-icon icon="add" class="main__button"></iron-icon>
               </a>
-              <a href="" class="main__href" 
-                hidden$="[[_computeHideAction(page, smallScreen, '', 'create', 'toolbar')]]">
-                <iron-icon icon="send" class="main__button--default"></iron-icon>
-              </a>
+
+              <paper-icon-button icon="send" class="main__button" on-tap="_createItemTapped"
+                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, '', 'create')]]"></paper-icon-button>
+
               <a href="https://twitter.com/jlramosromero" target="_blank" class="main__href" 
                 hidden$="[[smallScreen]]">  
                 <iron-icon icon="twitter" class="main__button--social"></iron-icon>
               </a>
+
               <a href="https://www.facebook.com/futbolypensamiento" target="_blank" class="main__href" 
                 hidden$="[[smallScreen]]">  
                 <iron-icon icon="facebook" class="main__button--social"></iron-icon>
               </a>
-              <paper-icon-button icon="menu" class="main__button--default" drawer-toggle 
-                hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'menu', 'toolbar', itemInfo.id)]]"></paper-icon-button>
+
+              <paper-icon-button icon="menu" class="main__button" drawer-toggle 
+                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, itemInfo.action, 'menu', itemInfo.id)]]"></paper-icon-button>
+
             </div>
+
           </app-toolbar>
 
           <!-- Lazy-create the tabs for larger screen sizes. -->
@@ -378,24 +441,24 @@
               <div class="main__menu__title">{{menuHeader}}</div>
               <div class="main__menu__tabs">
                 <a href="/item/[[itemInfo.id]]" class="main__menu__tab"
-                  hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'view', 'menu', itemInfo.id)]]">
-                  <iron-icon icon="checks" class="main__menu__icon"></iron-icon>Vote
+                  hidden$="[[_computeHideActionMenu(page, itemInfo.action, 'view', itemInfo.id)]]">
+                  <iron-icon icon="gavel" class="main__menu__icon"></iron-icon>Vote
                 </a>
                 <a href="/item/[[itemInfo.id]]/results" class="main__menu__tab"
-                  hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'results', 'menu', itemInfo.id)]]">
+                  hidden$="[[_computeHideActionMenu(page, itemInfo.action, 'results', itemInfo.id)]]">
                   <iron-icon icon="timeline" class="main__menu__icon"></iron-icon>Results
                 </a>
                 <a href="/item/[[itemInfo.id]]/edit" class="main__menu__tab"
-                  hidden$="[[_computeHideAction(page, smallScreen, itemInfo.action, 'edit', 'menu', itemInfo.id)]]">
+                  hidden$="[[_computeHideActionMenu(page, itemInfo.action, 'edit', itemInfo.id)]]">
                   <iron-icon icon="edit" class="main__menu__icon"></iron-icon>Edit
                 </a>
                 <a href="/new/" title="New Election" class="main__menu__tab"
-                  hidden$="[[_computeHideAction(page, smallScreen, '', 'new', 'menu', itemInfo.id)]]">
+                  hidden$="[[_computeHideActionMenu(page, '', 'new', itemInfo.id)]]">
                   <iron-icon icon="add" class="main__menu__icon"></iron-icon>
                   <span hidden$="[[_isItemPage(page)]]">New Election</span>
                 </a>
                 <a href="/list/" title="Election List" class="main__menu__tab"
-                  hidden$="[[_computeHideAction(page, smallScreen, '', 'list', 'menu', itemInfo.id)]]">
+                  hidden$="[[_computeHideActionMenu(page, '', 'list', itemInfo.id)]]">
                   <iron-icon icon="list" class="main__menu__icon"></iron-icon>
                   <span hidden$="[[_isItemPage(page)]]">Election List</span>
                 </a>
@@ -415,6 +478,8 @@
             item-name='election'
             load-complete="{{loadComplete}}"
             route="{{route}}"
+            search-text="{{searchText}}"
+            sort-mode="{{sortMode}}"
             small-screen="[[smallScreen]]"></polyvote-list>
 
           <polyvote-new
@@ -483,6 +548,30 @@
           observer: '_pathChanged'
         },
 
+        searchText: String,
+
+        /*
+        * Sort container mode indicated for the icon.
+        *
+        * 0: none, 1: descendent, -1: ascendent.
+        */
+        sortMode: {
+          type: Number,
+          value: 0,
+          observer: '_sortModeChanged',
+        },
+
+        searchActive: {
+          type: Boolean,
+          value: false,
+          observer: '_searchActiveChanged',
+        },
+
+        sortActive: {
+          type: Boolean,
+          value: false
+        },
+
         itemInfo: {
           type: Object,
           value: {
@@ -525,13 +614,6 @@
         '_pageItemChanged(page, itemInfo.title, itemInfo.id, itemInfo.backPage, smallScreen)'
       ],
 
-      _closeDrawer() {
-        const drawer = Polymer.dom(this.root).querySelector('#drawer');
-        if (drawer) {
-          drawer.close();
-        }
-      },
-
       created() {
         // Custom elements polyfill safe way to indicate an element has been upgraded.
         this.removeAttribute('unresolved');
@@ -543,6 +625,58 @@
           this.listen(window, 'online', '_notifyNetworkStatus');
           this.listen(window, 'offline', '_notifyNetworkStatus');
         });
+      },
+
+      _closeDrawer() {
+        const drawer = Polymer.dom(this.root).querySelector('#drawer');
+        if (drawer) {
+          drawer.close();
+        }
+      },
+
+      _createItemTapped() {
+        this.$$('polyvote-new').createItem();
+      },
+
+      _saveItemTapped() {
+        this.$$('polyvote-item').saveItem();
+      },
+
+      _searchTapped() {
+        this.searchActive = !this.searchActive;
+      },
+
+      _closeSearchTapped() {
+        this.searchActive = false;
+      },
+
+      _sortTapped() {
+        if (this.sortMode < 1) {
+          this.sortMode += 1;
+        }
+        else {
+          this.sortMode = -1;
+        }
+      },
+
+      _searchActiveChanged(searchActive) {
+        if (searchActive) {
+          this.$.searchInput.removeAttribute('hidden');
+          this.$.searchInput.focus();
+        }
+        else {
+          this.$.searchInput.setAttribute('hidden', '');
+          this.searchText = '';
+        }
+      },
+
+      _sortModeChanged(sortMode) {
+        if (Boolean(sortMode)) {
+          this.$.sortActive = true;
+        }
+        else {
+          this.$.sortActive = false;
+        }
       },
 
       /*
@@ -573,6 +707,8 @@
       _pageItemChanged(page, itemTitle, _itemId, itemBackPage, smallScreen) {
         let header = '';
         let back = '';
+        this.searchActive = false; // no search filters
+        this.sortMode = 0; // no sort
         if (page == 'list') {
           header = 'Elections';     
         }
@@ -602,58 +738,45 @@
       },
 
       /**
-        * Decide when a button action must be hidden.
+        * Decide when a button action must be hidden in menu bar.
+        *
+        * @param {String} The current url page.
+        * @param {String} The current url action.
+        * @param {String} The action of the current button.
+        * @param {String} Id of the current item (if there is one).
+        */
+      _computeHideActionMenu(page, action, actionButton, itemId) {
+        if (page == 'list' && actionButton != 'new' && 
+            actionButton != 'search' && actionButton != 'sort') return true;
+        if (page == 'item' && action == 'edit') return true;
+        if (page == 'item' && (action == actionButton || !itemId)) return true;
+        if (page == 'new' && actionButton != 'list') return true;
+        if (page == 'e404') return true;
+        return false;
+      },
+
+            /**
+        * Decide when a button action must be hidden in main toolbar.
         *
         * @param {String} The current url page.
         * @param {Boolean} True if small screen.
+        * @param {Boolean} True if search process is active.
         * @param {String} The current url action.
         * @param {String} The action of the current button.
-        * @param {String} Place of the button (toolbar or menu).
         * @param {String} Id of the current item (if there is one).
         */
-      _computeHideAction(page, smallScreen, action, actionButton, place, itemId) {
-        if (place == 'menu') {
-          // menu
-          if (page == 'item') {
-            if (action == 'edit')
-              return true;
-            if (action == actionButton || !itemId)
-              return true;
-          }
-          if (page == 'new' && actionButton != 'list') {
-            return true;
-          }
-          if (page == 'list' && actionButton != 'new') {
-            return true;
-          }
-          if (page == 'e404') {
-            return true;
-          }
-          return false;
-        }
-        else {
-          // toolbar
-          if (!smallScreen) return true;
-          if (page == 'item') {
-            if (action == 'edit') {
-              if (actionButton != 'save') 
-                return true;
-            }
-            else if (action == actionButton || actionButton == 'new' || actionButton == 'save' || !itemId) {
-              return true;
-            }
-          }
-          if (page == 'list' && actionButton != 'new' && actionButton != 'menu') {
-            return true;
-          }
-          if (page == 'new' && actionButton != 'create') {
-            return true;
-          }
-          if (page == 'e404') {
-            return true;
-          }
-          return false;
-        }
+      _computeHideActionToolbar(page, smallScreen, searchActive, action, actionButton, itemId) {
+        if (!smallScreen) return true;
+        if (page == 'list' && searchActive && actionButton != 'search' && actionButton != 'sort') return true;
+        if (page == 'list' && !searchActive && actionButton != 'new' && 
+            actionButton != 'search' && actionButton != 'sort') return true;
+        if (page == 'item' && action == 'edit' && actionButton != 'save') return true;
+        if (page == 'item' && action != 'edit' && 
+           (action == actionButton || actionButton == 'new' || actionButton == 'save' || 
+            actionButton == 'search' || actionButton == 'sort' || !itemId)) return true;
+        if (page == 'new' && actionButton != 'create') return true;
+        if (page == 'e404') return true;
+        return false;
       },
 
       /**
@@ -749,6 +872,17 @@
       _showPage404(event) {
         this.$$('polyvote-e404').message = event.detail;
         this.page = 'e404';
+      },
+
+      _computeSearchIconClass(searchActive) {
+        if (searchActive) return 'main__button--active';
+        return '';
+      },
+
+      _computeSortIconClass(sortMode) {
+        if (sortMode == 1) return 'main__button--active'; //descendent
+        if (sortMode == -1) return 'main__button--active main__button--reverse' //ascendant
+        return '';
       },
 
       _computeShouldRenderSmallScreen(smallScreen, loadComplete) {

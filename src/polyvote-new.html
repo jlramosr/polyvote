@@ -145,7 +145,7 @@
       }
     </style>
 
-    <div id="newContainer" class$="content--box [[_computeClassContainer(smallScreen)]]">
+    <div class$="content--box [[_computeClassContainer(edit, smallScreen)]]">
 
       <div class="main">
         <div class="main__upload">
@@ -215,12 +215,12 @@
         </div>
       </div>
       <div class="buttons">
-        <template is="dom-if" if="[[!edit]]">
-          <paper-button class="buttons__button" on-tap="_createTapped">Create</paper-button>
+        <template is="dom-if" if="[[_computeShowNewButtons(edit, smallScreen)]]">
+          <paper-button class="buttons__button" on-tap="createItem">Create</paper-button>
           <paper-button class="buttons__button" on-tap="_clearTapped">Clear</paper-button>
         </template>
-        <template is="dom-if" if="[[edit]]">
-          <paper-button class="buttons__button" on-tap="_saveTapped">Save</paper-button>
+        <template is="dom-if" if="[[_computeShowEditButtons(edit, smallScreen)]]">
+          <paper-button class="buttons__button" on-tap="saveItem">Save</paper-button>
           <paper-button class="buttons__button" on-tap="_clearTapped">Cancel</paper-button>
         </template>
       </div>
@@ -418,8 +418,8 @@
         return false;
       },
 
-      _computeClassContainer(smallScreen) {
-        if (!this.smallScreen) {
+      _computeClassContainer(edit, smallScreen) {
+        if (!edit && !this.smallScreen) {
           return 'content--box-desktop';
         }
       },
@@ -447,7 +447,7 @@
         * Order create a new item to database with the
         * field values completed by the user.
         */
-      _createTapped() {
+      createItem() {
         if (this._inputsValidate()) {
           if (this.item.options.length > this.optionsRequired) {
             // last option is empty
@@ -476,7 +476,7 @@
         *
         * Update the new information to the item.
         */
-      _saveTapped() {
+      saveItem() {
         if (this._inputsValidate()) {
           let options = this.item.options;
           const optionsLength = options.length;
@@ -609,6 +609,14 @@
       _computeOptionInputClass(index) {
         if (!this._isOptionRequired(index))
           return 'options__option__input--width-smaller';
+      },
+
+      _computeShowNewButtons(edit, smallScreen) {
+        return !edit && !smallScreen;
+      },
+
+      _computeShowEditButtons(edit, smallScreen) {
+        return edit && !smallScreen ;
       }
       
     });
