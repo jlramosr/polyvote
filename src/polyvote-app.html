@@ -55,7 +55,7 @@
       .main__input {
         @apply(--layout-flex);
         font-size: 16px;
-        margin-right: -18px !important;
+        height: 70%;
         padding: 12px 8px;
         border: none;
         background-color: #eee;
@@ -72,6 +72,10 @@
       .main__input:focus {
         outline: none;
         background-color: #fff;
+      }
+
+      .main__input--toolbar {
+        margin-right: -18px !important;
       }
 
       .main__title-content {
@@ -117,15 +121,6 @@
         margin-right: 4px;
       }
 
-      .main__button--reverse {
-        -moz-transform: scaleY(-1);
-        -o-transform: scaleY(-1);
-        -webkit-transform: scaleY(-1);
-        transform: scaleY(-1);
-        filter: FlipV;
-        -ms-filter: "FlipV";
-      }
-
       .main__title__icon {
         margin-right: 8px;
       }
@@ -148,8 +143,8 @@
       .main__menu__title {
         @apply(--layout-flex);
         padding-left: 8px;
-        font-size: 16px;
-        font-weight: 400;
+        font-size: 18px;
+        font-weight: 500;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -166,19 +161,22 @@
       .main__menu__tab {
         @apply(--layout-horizontal);
         @apply(--layout-center-center);
-        color: var(--app-primary-color);
-        box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-        padding: 0 4px;
+        color: #FFF;
+        background-color: var(--app-primary-color-dark);
+        font-weight: 100;
+        border-radius: 5px;
+        padding: 0 8px;
         margin: 6px;
+        cursor: pointer;
       }
-              
-      .main__menu__tab--simple {
-        border: 0;
+
+      .main__menu__tab--active {
+        background: var(--app-primary-color-soft);
       }
 
       .main__menu__tab:hover {
-        background: var(--app-primary-color-soft);
-        color: #000;
+        background: var(--app-primary-color);
+        color: #ddd;
       }
 
       .main__menu__icon {
@@ -250,6 +248,22 @@
 
       .drawer__social__icon:hover {
         background: var(--app-primary-color-light);
+      }
+
+      .info-message--info {
+        --paper-toast-background-color: #222;
+      }
+
+      .info-message--success {
+        --paper-toast-background-color: #252;
+      }
+
+      .info-message--warning {
+        --paper-toast-background-color: #533;
+      }
+
+      .info-message--error {
+        --paper-toast-background-color: #a22;
       }
 
       /*footer {
@@ -367,7 +381,8 @@
 
           <app-toolbar class$="toolbar [[_computeBackgroundToolbar(page)]] main__toolbar">
 
-            <input id="searchInput" class="main__input" type="search" placeholder="Search" value="{{searchText::input}}" hidden></input>
+            <input id="searchInputToolbar" class="main__input main__input--toolbar" type="search"
+              placeholder="Search" value="{{searchText::input}}" hidden></input>
 
             <paper-icon-button icon="[[_getIconBackPage(page, itemInfo.action)]]" on-tap="_backTapped"
               hidden$="[[!backPage]]" class="main__button main__button--back"></paper-icon-button>
@@ -377,46 +392,55 @@
                 <template is="dom-if" if="[[_shouldRenderBigScreen]]">
                   <iron-image src="/images/manifest/icon-24x24.png" class="main__title__icon"></iron-image>
                 </template>
-                <span hidden$="[[searchActive]]">{{header}}</span>
+                <span hidden$="[[searchActive]]">{{toolbarHeader}}</span>
               </div>
             </div>
 
             <div class="main__button--position-right">
 
               <paper-icon-button icon="search" class$="main__button main__button--search [[_computeSearchIconClass(searchActive)]]" 
-                on-tap="_searchTapped" hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, '', 'search')]]"></paper-icon-button>
+                on-tap="_searchTapped" hidden$="[[!_computeShowActionToolbar('search', smallScreen, searchActive, sortMode, page)]]">
+              </paper-icon-button>
 
-              <paper-icon-button icon="close" class$="main__button" on-tap="_closeSearchTapped"
-                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, '', 'close-search')]]"></paper-icon-button>
+              <paper-icon-button icon="sort" class="main__button"
+                on-tap="_sortTapped" hidden$="[[!_computeShowActionToolbar('sort', smallScreen, searchActive, sortMode, page)]]">
+              </paper-icon-button>
+              
+              <paper-icon-button icon="sort-descending" class="main__button main__button--active" 
+                on-tap="_sortTapped" hidden$="[[!_computeShowActionToolbar('sort-descending', smallScreen, searchActive, sortMode, page)]]">
+              </paper-icon-button>
 
-              <paper-icon-button icon="sort" class$="main__button [[_computeSortIconClass(sortMode)]]" 
-                on-tap="_sortTapped" hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, '', 'sort')]]"></paper-icon-button>
+              <paper-icon-button icon="sort-ascending" class="main__button main__button--active" 
+                on-tap="_sortTapped" hidden$="[[!_computeShowActionToolbar('sort-ascending', smallScreen, searchActive, sortMode, page)]]">
+              </paper-icon-button>
 
               <a href="/item/[[itemInfo.id]]/" class="main__href"
-                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, itemInfo.action, 'view', itemInfo.id)]]">
+                hidden$="[[!_computeShowActionToolbar('view', smallScreen, searchActive, sortMode, page, itemInfo.action, itemInfo.id)]]">
                 <iron-icon icon="gavel" class="main__button"></iron-icon>
               </a>
 
               <a href="/item/[[itemInfo.id]]/results/" class="main__href"
-                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, itemInfo.action, 'results', itemInfo.id)]]">
+                hidden$="[[!_computeShowActionToolbar('results', smallScreen, searchActive, sortMode, page, itemInfo.action, itemInfo.id)]]">
                 <iron-icon icon="timeline" class="main__button"></iron-icon>
               </a>
 
               <a href="/item/[[itemInfo.id]]/edit/" class="main__href"
-                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, itemInfo.action, 'edit', itemInfo.id)]]">
+                hidden$="[[!_computeShowActionToolbar('edit', smallScreen, searchActive, sortMode, page, itemInfo.action, itemInfo.id)]]">
                 <iron-icon icon="edit" class="main__button"></iron-icon>
               </a>
 
               <paper-icon-button icon="done" class="main__button" on-tap="_saveItemTapped"
-                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, itemInfo.action, 'save', itemInfo.id)]]"></paper-icon-button>
+                hidden$="[[!_computeShowActionToolbar('save', smallScreen, searchActive, sortMode, page, itemInfo.action, itemInfo.id)]]">
+              </paper-icon-button>
 
               <a href="/new/" class="main__href"
-                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, '', 'new')]]">
+                hidden$="[[!_computeShowActionToolbar('new', smallScreen, searchActive, sortMode, page)]]">
                 <iron-icon icon="add" class="main__button"></iron-icon>
               </a>
 
               <paper-icon-button icon="send" class="main__button" on-tap="_createItemTapped"
-                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, '', 'create')]]"></paper-icon-button>
+                hidden$="[[!_computeShowActionToolbar('create', smallScreen, searchActive, sortMode, page)]]">
+              </paper-icon-button>
 
               <a href="https://twitter.com/jlramosromero" target="_blank" class="main__href" 
                 hidden$="[[smallScreen]]">  
@@ -429,40 +453,94 @@
               </a>
 
               <paper-icon-button icon="menu" class="main__button" drawer-toggle 
-                hidden$="[[_computeHideActionToolbar(page, smallScreen, searchActive, itemInfo.action, 'menu', itemInfo.id)]]"></paper-icon-button>
+                hidden$="[[!_computeShowActionToolbar('menu', smallScreen, searchActive, sortMode, page, itemInfo.action, itemInfo.id)]]">
+              </paper-icon-button>
 
             </div>
-
           </app-toolbar>
 
           <!-- Lazy-create the tabs for larger screen sizes. -->
           <template is="dom-if" if="[[_shouldRenderBigScreen]]">
             <div class="main__menu">
-              <div class="main__menu__title">{{menuHeader}}</div>
+
+              <input id="searchInputMenu" class="main__input" type="search" 
+                placeholder="Search" value="{{searchText::input}}" hidden></input>
+
+              <div class="main__menu__title" hidden$="[[searchActive]]">{{menuHeader}}</div>
+
               <div class="main__menu__tabs">
+
+                <a class$="main__menu__tab [[_computeSearchIconClass(searchActive)]]" id="searchTabMenu"
+                  on-tap="_searchTapped" hidden$="[[!_computeShowActionMenu('search', sortMode, page)]]">
+                  <iron-icon icon="search" class="main__menu__icon"></iron-icon>
+                </a>
+                <!-- Lazy-create the tooltip -->
+                <template is="dom-if" if="[[loadComplete]]">
+                  <paper-tooltip
+                    for="searchTabMenu"
+                    offset="3">Search</paper-tooltip>
+                </template>
+
+                <a class="main__menu__tab" on-tap="_sortTapped" id="sortTabMenu"
+                  hidden$="[[!_computeShowActionMenu('sort', sortMode, page)]]">
+                  <iron-icon icon="sort" class="main__menu__icon"></iron-icon>
+                </a>
+                <!-- Lazy-create the tooltip -->
+                <template is="dom-if" if="[[loadComplete]]">
+                  <paper-tooltip
+                    for="sortTabMenu" 
+                    offset="3">Sort list</paper-tooltip>
+                </template>
+
+                <a class="main__menu__tab main__menu__tab--active" on-tap="_sortTapped"
+                  hidden$="[[!_computeShowActionMenu('sort-descending', sortMode, page)]]">
+                  <iron-icon icon="sort-descending" class="main__menu__icon"></iron-icon>
+                </a>
+
+                <a class="main__menu__tab  main__menu__tab--active" on-tap="_sortTapped"
+                  hidden$="[[!_computeShowActionMenu('sort-ascending', sortMode, page)]]">
+                  <iron-icon icon="sort-ascending" class="main__menu__icon"></iron-icon>
+                </a>
+
                 <a href="/item/[[itemInfo.id]]" class="main__menu__tab"
-                  hidden$="[[_computeHideActionMenu(page, itemInfo.action, 'view', itemInfo.id)]]">
+                  hidden$="[[!_computeShowActionMenu('view', sortMode, page, itemInfo.action, itemInfo.id)]]">
                   <iron-icon icon="gavel" class="main__menu__icon"></iron-icon>Vote
                 </a>
+
                 <a href="/item/[[itemInfo.id]]/results" class="main__menu__tab"
-                  hidden$="[[_computeHideActionMenu(page, itemInfo.action, 'results', itemInfo.id)]]">
+                  hidden$="[[!_computeShowActionMenu('results', sortMode, page, itemInfo.action, itemInfo.id)]]">
                   <iron-icon icon="timeline" class="main__menu__icon"></iron-icon>Results
                 </a>
+
                 <a href="/item/[[itemInfo.id]]/edit" class="main__menu__tab"
-                  hidden$="[[_computeHideActionMenu(page, itemInfo.action, 'edit', itemInfo.id)]]">
+                  hidden$="[[!_computeShowActionMenu('edit', sortMode, page, itemInfo.action, itemInfo.id)]]">
                   <iron-icon icon="edit" class="main__menu__icon"></iron-icon>Edit
                 </a>
-                <a href="/new/" title="New Election" class="main__menu__tab"
-                  hidden$="[[_computeHideActionMenu(page, '', 'new', itemInfo.id)]]">
+
+                <a href="/new/" title="New Election" class="main__menu__tab" id="addTabMenu"
+                  hidden$="[[!_computeShowActionMenu('new', sortMode, page)]]">
                   <iron-icon icon="add" class="main__menu__icon"></iron-icon>
                   <span hidden$="[[_isItemPage(page)]]">New Election</span>
                 </a>
-                <a href="/list/" title="Election List" class="main__menu__tab"
-                  hidden$="[[_computeHideActionMenu(page, '', 'list', itemInfo.id)]]">
+                <!-- Lazy-create the tooltip -->
+                <template is="dom-if" if="[[loadComplete]]">
+                  <paper-tooltip for="addTabMenu" hidden$="[[!_isItemPage(page)]]"
+                    offset="3">New election</paper-tooltip>
+                </template>
+
+                <a href="/list/" title="Election List" class="main__menu__tab" id="listTabMenu"
+                  hidden$="[[!_computeShowActionMenu('list', sortMode, page, itemInfo.action, itemInfo.id)]]">
                   <iron-icon icon="list" class="main__menu__icon"></iron-icon>
                   <span hidden$="[[_isItemPage(page)]]">Election List</span>
                 </a>
+                <!-- Lazy-create the tooltip -->
+                <template is="dom-if" if="[[loadComplete]]">
+                  <paper-tooltip  for="listTabMenu" hidden$="[[!_isItemPage(page)]]"
+                    offset="3">Election list</paper-tooltip>
+                </template>
+
               </div>
+
             </div>
           </template>
         </app-header>
@@ -483,7 +561,7 @@
             small-screen="[[smallScreen]]"></polyvote-list>
 
           <polyvote-new
-            name="new" 
+            name="new"
             storage="{{storage}}"
             load-complete="{{loadComplete}}"
             route="{{route}}"
@@ -512,6 +590,10 @@
       </app-header-layout>
     </app-drawer-layout>
         
+    <!-- Lazy Creations -->
+    <template is="dom-if" if="[[loadComplete]]">
+      <paper-toast raised id="infoMessage" duration="5000" class="{{classInfoMessage}}"></paper-toast>
+    </template>
 
   </template>
 </dom-module>
@@ -533,7 +615,7 @@
           value: "640px"
         },
 
-        header: String,
+        toolbarHeader: String,
 
         menuHeader: String,
 
@@ -563,8 +645,7 @@
 
         searchActive: {
           type: Boolean,
-          value: false,
-          observer: '_searchActiveChanged',
+          value: false
         },
 
         sortActive: {
@@ -606,12 +687,14 @@
       },
 
       listeners: {
-        'show-error-page': '_showPage404'
+        'show-error-page': '_showPage404',
+        'show-message': '_showInfoMessage'
       },
 
       observers: [
         '_routePageChanged(routeData.page)',
-        '_pageItemChanged(page, itemInfo.title, itemInfo.id, itemInfo.backPage, smallScreen)'
+        '_pageItemChanged(page, itemInfo.title, itemInfo.id, itemInfo.backPage, smallScreen)',
+        '_searchActiveChanged(searchActive, smallScreen, loadComplete)'
       ],
 
       created() {
@@ -659,14 +742,27 @@
         }
       },
 
-      _searchActiveChanged(searchActive) {
-        if (searchActive) {
-          this.$.searchInput.removeAttribute('hidden');
-          this.$.searchInput.focus();
-        }
-        else {
-          this.$.searchInput.setAttribute('hidden', '');
-          this.searchText = '';
+      _searchActiveChanged(searchActive, smallScreen, loadComplete) {
+        if (loadComplete) {
+          // in small screens get search input of toolbar as main input
+          // in big screens get search input of menu
+          let searchInputActive = smallScreen ? this.$.searchInputToolbar : this.$$('#searchInputMenu');
+          let searchInputInactive = smallScreen ? this.$$('#searchInputMenu') : this.$.searchInputToolbar;
+          if (searchInputInactive) {
+            searchInputInactive.setAttribute('hidden', '');
+          }
+          if (searchActive) {
+            if (searchInputActive) {
+              searchInputActive.removeAttribute('hidden');
+              searchInputActive.focus();
+            }
+          }
+          else {
+            if (searchInputActive) {
+              searchInputActive.setAttribute('hidden', '');
+            }
+            this.searchText = '';
+          }
         }
       },
 
@@ -726,12 +822,12 @@
         }
         if (smallScreen) {
           // small screens
-          this.header = header;
+          this.toolbarHeader = header;
           this.backPage = back;
         }
         else {
           // big screens
-          this.header = this.appTitle;
+          this.toolbarHeader = this.appTitle;
           this.menuHeader = header;
           this.backPage = '';
         }
@@ -740,42 +836,48 @@
       /**
         * Decide when a button action must be hidden in menu bar.
         *
+        * @param {String} The action of the current button.
         * @param {String} The current url page.
         * @param {String} The current url action.
-        * @param {String} The action of the current button.
         * @param {String} Id of the current item (if there is one).
         */
-      _computeHideActionMenu(page, action, actionButton, itemId) {
-        if (page == 'list' && actionButton != 'new' && 
-            actionButton != 'search' && actionButton != 'sort') return true;
-        if (page == 'item' && action == 'edit') return true;
-        if (page == 'item' && (action == actionButton || !itemId)) return true;
-        if (page == 'new' && actionButton != 'list') return true;
-        if (page == 'e404') return true;
+      _computeShowActionMenu(actionButton, sortMode, page, action, itemId) {
+        if (actionButton == 'search' && page == 'list') return true;
+        if (actionButton == 'sort' && page == 'list' && !Boolean(sortMode)) return true;
+        if (actionButton == 'sort-descending' && page == 'list' && sortMode == 1) return true;
+        if (actionButton == 'sort-ascending' && page == 'list' && sortMode == -1) return true;
+        if (actionButton == 'new' && page == 'list') return true;
+        if (actionButton == 'list' && page == 'item' && action != 'edit') return true;
+        if (actionButton == 'edit' && page == 'item' && itemId && action != 'edit') return true;
+        if (actionButton == 'view' && page == 'item' && itemId && action != 'view' && action != 'edit') return true;
+        if (actionButton == 'results' && page == 'item' && itemId && action != 'results' && action != 'edit') return true;
         return false;
       },
 
             /**
-        * Decide when a button action must be hidden in main toolbar.
+        * Decide when a button action must be shown in main toolbar.
         *
-        * @param {String} The current url page.
-        * @param {Boolean} True if small screen.
-        * @param {Boolean} True if search process is active.
-        * @param {String} The current url action.
         * @param {String} The action of the current button.
+        * @param {Boolean} True if small screen.
+        * @param {Boolean} True if search is active.
+        * @param {Number} Search mode (0: no sort, 1: descending, -1: ascending).
+        * @param {String} The current url page.
+        * @param {String} The current url action.
         * @param {String} Id of the current item (if there is one).
         */
-      _computeHideActionToolbar(page, smallScreen, searchActive, action, actionButton, itemId) {
-        if (!smallScreen) return true;
-        if (page == 'list' && searchActive && actionButton != 'search' && actionButton != 'sort') return true;
-        if (page == 'list' && !searchActive && actionButton != 'new' && 
-            actionButton != 'search' && actionButton != 'sort') return true;
-        if (page == 'item' && action == 'edit' && actionButton != 'save') return true;
-        if (page == 'item' && action != 'edit' && 
-           (action == actionButton || actionButton == 'new' || actionButton == 'save' || 
-            actionButton == 'search' || actionButton == 'sort' || !itemId)) return true;
-        if (page == 'new' && actionButton != 'create') return true;
-        if (page == 'e404') return true;
+      _computeShowActionToolbar(actionButton, smallScreen, searchActive, sortMode, page, action, itemId) {
+        if (!smallScreen) return false;
+        if (actionButton == 'sort' && page == 'list' && !Boolean(sortMode)) return true;
+        if (actionButton == 'sort-descending'&& page == 'list' && sortMode == 1) return true;
+        if (actionButton == 'sort-ascending' && page == 'list' && sortMode == -1) return true;
+        if (actionButton == 'search' && page == 'list') return true;
+        if (actionButton == 'new' && page == 'list' && !searchActive) return true;
+        if (actionButton == 'save' && page == 'item' && itemId && action == 'edit') return true;
+        if (actionButton == 'edit' && page == 'item' && itemId && action != 'edit') return true;
+        if (actionButton == 'view' && page == 'item' && itemId && action != 'view' && action != 'edit' ) return true;
+        if (actionButton == 'results' && page == 'item' && itemId && action != 'results' && action != 'edit') return true;
+        if (actionButton == 'menu' && page == 'item' && itemId && action != 'edit') return true;
+        if (actionButton == 'create' && page == 'new') return true;
         return false;
       },
 
@@ -835,6 +937,20 @@
         this._ensureLazyLoaded();
       },
 
+      _showInfoMessage(event) {
+        const infoMessage = this.$$('#infoMessage');
+        const message = event.detail.message;
+        const type = event.detail.type;
+        if (infoMessage) {
+          this.classInfoMessage = 'info-message--info';
+          if (type == 'error') this.classInfoMessage = 'info-message--error';
+          if (type == 'warning') this.classInfoMessage = 'info-message--warning';
+          if (type == 'success') this.classInfoMessage = 'info-message--success';
+          infoMessage.text = message;
+          infoMessage.open();
+        }
+      },
+
       _ensureLazyLoaded() {
         // load lazy resources after render and set `loadComplete` when done.
         if (!this.loadComplete) {
@@ -875,13 +991,8 @@
       },
 
       _computeSearchIconClass(searchActive) {
-        if (searchActive) return 'main__button--active';
-        return '';
-      },
-
-      _computeSortIconClass(sortMode) {
-        if (sortMode == 1) return 'main__button--active'; //descendent
-        if (sortMode == -1) return 'main__button--active main__button--reverse' //ascendant
+        if (searchActive && this.smallScreen) return 'main__button--active';
+        if (searchActive && !this.smallScreen) return 'main__menu__tab--active';
         return '';
       },
 

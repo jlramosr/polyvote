@@ -215,13 +215,14 @@
         </div>
       </div>
       <div class="buttons">
-        <template is="dom-if" if="[[_computeShowNewButtons(edit, smallScreen)]]">
+        <template is="dom-if" if="[[_shouldRenderNewButtons]]">
           <paper-button class="buttons__button" on-tap="createItem">Create</paper-button>
           <paper-button class="buttons__button" on-tap="_clearTapped">Clear</paper-button>
+          <paper-button class="buttons__button" on-tap="_cancelTapped">Cancel</paper-button>
         </template>
-        <template is="dom-if" if="[[_computeShowEditButtons(edit, smallScreen)]]">
+        <template is="dom-if" if="[[_shouldRenderEditButtons]]">
           <paper-button class="buttons__button" on-tap="saveItem">Save</paper-button>
-          <paper-button class="buttons__button" on-tap="_clearTapped">Cancel</paper-button>
+          <paper-button class="buttons__button" on-tap="_cancelTapped">Cancel</paper-button>
         </template>
       </div>
 
@@ -334,6 +335,14 @@
           value: false
         },
 
+        _shouldRenderNewButtons: {
+          computed: '_computeShouldRenderNewButtons(edit, smallScreen)'
+        },
+
+        _shouldRenderEditButtons: {
+          computed: '_computeShouldRenderEditButtons(edit, smallScreen)'
+        }
+
       },
 
       ready() {
@@ -379,18 +388,6 @@
       addOption() {
         if (this.item.options)
           this.push('item.options', {"title": "", "votes": 0, "custom": false});
-      },
-
-      _computeHideRemoveButton(index) {
-        if (index < this.optionsRequired || !this.item.options[index].title)
-          return true;
-        return false;
-      },
-
-      _computeClassContainer(edit, smallScreen) {
-        if (!edit && !this.smallScreen) {
-          return 'content--box-desktop';
-        }
       },
 
       /**
@@ -461,14 +458,22 @@
         * Fired when the user tap on clear button in new mode.
         */
       _clearTapped() {
+        // clear all fields
+        this.setEmptyFields();
+      },
+
+      /**
+        * Fired when the user tap on cancel button.
+        */
+      _cancelTapped() {
         if (this.edit) {
-          // reset view with old values
-          this.fire('reset-item-tapped');
+          this.fire('cancel-save-item-tapped');
         }
         else {
           // clear all fields
           this.setEmptyFields();
         }
+        this.set('route.path', `/home/`);
       },
 
       _openDialog(element) {
@@ -569,6 +574,18 @@
         return false;
       },
 
+      _computeHideRemoveButton(index) {
+        if (index < this.optionsRequired || !this.item.options[index].title)
+          return true;
+        return false;
+      },
+
+      _computeClassContainer(edit, smallScreen) {
+        if (!edit && !this.smallScreen) {
+          return 'content--box-desktop';
+        }
+      },
+
       /**
         * It adds a new class to input option if it is not required.
         *
@@ -580,11 +597,11 @@
           return 'options__option__input--width-smaller';
       },
 
-      _computeShowNewButtons(edit, smallScreen) {
+      _computeShouldRenderNewButtons(edit, smallScreen) {
         return !edit && !smallScreen;
       },
 
-      _computeShowEditButtons(edit, smallScreen) {
+      _computeShouldRenderEditButtons(edit, smallScreen) {
         return edit && !smallScreen ;
       }
       
