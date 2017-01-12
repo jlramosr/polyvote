@@ -11,6 +11,7 @@
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 
+<link rel="import" href="polyvote-animations.html">
 <link rel="import" href="shared-styles.html">
 
 <!-- Configurations -->
@@ -18,6 +19,7 @@
 
 <!-- Since 'list' is the default route, eagerly load it. -->
 <link rel="import" href="polyvote-list.html">
+
 
 <dom-module id="polyvote-app">
   <template>
@@ -251,19 +253,19 @@
       }
 
       .info-message--info {
-        --paper-toast-background-color: #222;
+        background-color: #222;
       }
 
       .info-message--success {
-        --paper-toast-background-color: #252;
+        background-color: #252;
       }
 
       .info-message--warning {
-        --paper-toast-background-color: #533;
+        background-color: #533;
       }
 
       .info-message--error {
-        --paper-toast-background-color: #a22;
+        background-color: #a22;
       }
 
       /*footer {
@@ -340,6 +342,8 @@
 
     <iron-media-query query="max-width: [[responsiveWidth]]" query-matches="{{smallScreen}}"></iron-media-query>
 
+    <polyvote-animations id="animations"></polyvote-animations>          
+
     <app-drawer-layout fullbleed responsive-width="[[responsiveWidth]]">
       <!-- Drawer content -->
       <!-- Lazy-create the drawer for small screen sizes. -->
@@ -392,7 +396,7 @@
                 <template is="dom-if" if="[[_shouldRenderBigScreen]]">
                   <iron-image src="/images/manifest/icon-24x24.png" class="main__title__icon"></iron-image>
                 </template>
-                <span hidden$="[[searchActive]]">{{toolbarHeader}}</span>
+                <span id="toolbarHeader">{{toolbarHeader}}</span>
               </div>
             </div>
 
@@ -592,7 +596,9 @@
         
     <!-- Lazy Creations -->
     <template is="dom-if" if="[[loadComplete]]">
-      <paper-toast raised id="infoMessage" duration="5000" class="{{classInfoMessage}}"></paper-toast>
+
+      <paper-toast raised id="infoMessage" duration="5000"></paper-toast>
+
     </template>
 
   </template>
@@ -753,13 +759,15 @@
           }
           if (searchActive) {
             if (searchInputActive) {
-              searchInputActive.removeAttribute('hidden');
+              this.$.animations.showFromLeft(searchInputActive);
+              if (smallScren) this.$.animations.hideToLeft(this.$.toolbarHeader);
               searchInputActive.focus();
             }
           }
           else {
             if (searchInputActive) {
-              searchInputActive.setAttribute('hidden', '');
+              this.$.animations.hideToLeft(searchInputActive);
+              if (smallScreen) this.$.animations.showFromLeft(this.$.toolbarHeader);
             }
             this.searchText = '';
           }
@@ -942,10 +950,10 @@
         const message = event.detail.message;
         const type = event.detail.type;
         if (infoMessage) {
-          this.classInfoMessage = 'info-message--info';
-          if (type == 'error') this.classInfoMessage = 'info-message--error';
-          if (type == 'warning') this.classInfoMessage = 'info-message--warning';
-          if (type == 'success') this.classInfoMessage = 'info-message--success';
+          if (type == 'error') infoMessage.className = 'info-message--error';
+          else if (type == 'warning') infoMessage.className = 'info-message--warning';
+          else if (type == 'success') infoMessage.className = 'info-message--success';
+          else infoMessage.className = 'info-message--info';
           infoMessage.text = message;
           infoMessage.open();
         }
@@ -988,6 +996,15 @@
       _showPage404(event) {
         this.$$('polyvote-e404').message = event.detail;
         this.page = 'e404';
+      },
+
+      _computeHideToolbarHeader(searchActive, smallScreen) {
+        if (searchActive && smallScreen) {
+          
+        }
+        else {
+          this.$.animations.showFromLeft(this.$.toolbarHeader);
+        }
       },
 
       _computeSearchIconClass(searchActive) {

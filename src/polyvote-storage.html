@@ -51,13 +51,15 @@
         };
         const mainType = file.type.split('/')[0];
         if (Boolean(type) && mainType != type) {
-          console.log(`UPLOAD ERROR: FILE SELECTED IS NOT A ${type}/`);
+          this.fire('show-message', {
+            "message": `UPLOAD ERROR: File selected is not a ${type}`,
+            "type": 'error'
+          });
           return;
         }
         if (Boolean(maxSize) && file.size > maxSize * 1000000) {
-          console.log(`UPLOAD ERROR: FILE SELECTED IS TOO LARGE. MAX ${maxSize} MBs`);
           this.fire('show-message', {
-            "message": `Upload Error: File selected is too large (MAX ${maxSize} MBs)`,
+            "message": `UPLOAD ERROR: File selected is too large (MAX ${maxSize} MBs)`,
             "type": 'error'
           });
           return;
@@ -82,13 +84,22 @@
         }, error => {
           switch (error.code) {
             case 'storage/unauthorized':
-              console.log("UPLOAD ERROR: User doesn't have permission to access the object");
+              this.fire('show-message', {
+                "message": "UPLOAD ERROR: User doesn't have permission to access the object",
+                "type": 'error'
+              });
               break;
             case 'storage/canceled':
-              console.log("UPLOAD ERROR: User canceled the upload");
+              this.fire('show-message', {
+                "message": "UPLOAD ERROR: User canceled the upload",
+                "type": 'error'
+              });
               break;
             case 'storage/unknown':
-              console.log("UPLOAD ERROR: Unknown error occurred", error.serverResponse);
+              this.fire('show-message', {
+                "message": "UPLOAD ERROR: Unknown error occurred",
+                "type": 'error'
+              });
               break;
           }      
         }, _ => {

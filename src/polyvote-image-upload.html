@@ -133,6 +133,14 @@
 
         progress: Number,
 
+        /*
+         * Maximum size of the file in MBs
+         */
+        maxSize: {
+          type: Number,
+          value: 5
+        },
+
         imageLoaded: {
           type: Boolean,
           observer: '_imageLoadedChanged'
@@ -167,7 +175,7 @@
           //it has been selected at least one file
           const files = event.target.files;
           const numFiles = event.target.files.length;
-          const urlFile = this.$$('#st').uploadFile(files[numFiles-1], 'image', 0.01, files[numFiles-1].name);
+          const urlFile = this.$$('#st').uploadFile(files[numFiles-1], 'image', this.maxSize, files[numFiles-1].name);
           this.addEventListener('file-uploaded', event => {
             const urlFile = event.detail.url; 
             this.set('image', urlFile);
