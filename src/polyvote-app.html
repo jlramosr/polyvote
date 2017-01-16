@@ -694,7 +694,8 @@
 
       listeners: {
         'show-error-page': '_showPage404',
-        'show-message': '_showInfoMessage'
+        'show-message': '_showInfoMessage',
+        'iron-select': '_ironSelected'
       },
 
       observers: [
@@ -702,6 +703,13 @@
         '_pageItemChanged(page, itemInfo.title, itemInfo.id, itemInfo.backPage, smallScreen)',
         '_searchActiveChanged(searchActive, smallScreen, loadComplete)'
       ],
+
+      _ironSelected(event) {
+        console.log("HOLA", event.detail);
+        if (event.detail.item.localName.startstWith('polyvote-')) {
+          console.log("ES UNA VISTA", event.detail);
+        }
+      },
 
       created() {
         // Custom elements polyfill safe way to indicate an element has been upgraded.
@@ -755,20 +763,17 @@
           let searchInputActive = smallScreen ? this.$.searchInputToolbar : this.$$('#searchInputMenu');
           let searchInputInactive = smallScreen ? this.$$('#searchInputMenu') : this.$.searchInputToolbar;
           if (searchInputInactive) {
-            searchInputInactive.setAttribute('hidden', '');
+            this.$.animations.hide(searchInputInactive);
           }
-          if (searchActive) {
-            if (searchInputActive) {
-              this.$.animations.showFromLeft(searchInputActive);
-              if (smallScren) this.$.animations.hideToLeft(this.$.toolbarHeader);
-              searchInputActive.focus();
-            }
+          if (searchInputActive && searchActive) {
+            if (smallScreen) this.$.animations.showFromLeft(searchInputActive);
+            this.$.animations.hide(this.$.toolbarHeader)
+            searchInputActive.focus();
           }
-          else {
-            if (searchInputActive) {
-              this.$.animations.hideToLeft(searchInputActive);
+          else if (searchInputActive && !searchActive) {
+            this.$.animations.hideToLeft(searchInputActive, _ => {
               if (smallScreen) this.$.animations.showFromLeft(this.$.toolbarHeader);
-            }
+            });
             this.searchText = '';
           }
         }
@@ -930,7 +935,6 @@
             return;
             // other routes are lazy loaded
           }
-
           // Load page import on demand. Show 404 page if fails
           const resolvedPageUrl = this.resolveUrl(`polyvote-${page}.html`);
           this.importHref(resolvedPageUrl, this._pageLoaded, this._pageErrorLoaded, true);
@@ -943,20 +947,6 @@
 
       _pageLoaded() {
         this._ensureLazyLoaded();
-      },
-
-      _showInfoMessage(event) {
-        const infoMessage = this.$$('#infoMessage');
-        const message = event.detail.message;
-        const type = event.detail.type;
-        if (infoMessage) {
-          if (type == 'error') infoMessage.className = 'info-message--error';
-          else if (type == 'warning') infoMessage.className = 'info-message--warning';
-          else if (type == 'success') infoMessage.className = 'info-message--success';
-          else infoMessage.className = 'info-message--info';
-          infoMessage.text = message;
-          infoMessage.open();
-        }
       },
 
       _ensureLazyLoaded() {
@@ -998,12 +988,17 @@
         this.page = 'e404';
       },
 
-      _computeHideToolbarHeader(searchActive, smallScreen) {
-        if (searchActive && smallScreen) {
-          
-        }
-        else {
-          this.$.animations.showFromLeft(this.$.toolbarHeader);
+      _showInfoMessage(event) {
+        const infoMessage = this.$$('#infoMessage');
+        const message = event.detail.message;
+        const type = event.detail.type;
+        if (infoMessage) {
+          if (type == 'error') infoMessage.className = 'info-message--error';
+          else if (type == 'warning') infoMessage.className = 'info-message--warning';
+          else if (type == 'success') infoMessage.className = 'info-message--success';
+          else infoMessage.className = 'info-message--info';
+          infoMessage.text = message;
+          infoMessage.open();
         }
       },
 

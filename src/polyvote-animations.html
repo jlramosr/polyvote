@@ -11,29 +11,42 @@
 
       is: 'polyvote-animations',
 
-      showFromLeft(element) {
+      show(element) {
         element.removeAttribute('hidden');
-        element.animate([
-          { transform: 'translateX(-600px)' }, 
-          { transform: 'translateX(0px)' }
-        ], { 
-          easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
-          duration: 300
-        });
       },
 
-      hideToLeft(element) {
-        let animation = element.animate([
-          { transform: 'translateX(0px)', opacity: 1 },
-          { transform: 'translateX(-600px)', opacity: 0 }
-        ], {
-          easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
-          duration: 300
-        });
-        animation.onfinish = _ => {
-          element.setAttribute('hidden', '');
-        };
-      }       
+      showFromLeft(element) {
+        if (element.hidden) {
+          this.show(element);
+          element.animate([
+            { transform: 'translateX(-600px)' }, 
+            { transform: 'translateX(0px)' }
+          ], {
+            easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+            duration: 200
+          });
+        }
+      },
+
+      hide(element) {
+        element.setAttribute('hidden', '');
+      },
+
+      hideToLeft(element, onfinish) {
+        if (!element.hidden) {
+          let animation = element.animate([
+            { transform: 'translateX(0px)', opacity: 1 },
+            { transform: 'translateX(-600px)', opacity: 0 }
+          ], {
+            easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+            duration: 200
+          });
+          animation.onfinish = _ => {
+            this.hide(element);
+            if (onfinish) onfinish();
+          };
+        }
+      } 
 
     });
   })();
