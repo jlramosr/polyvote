@@ -135,11 +135,19 @@
       },
 
       listeners: {
+        /* From elements of iron-pages */
         'vote-item-tapped': '_voteItem',
         'save-item-tapped': '_updateItem',
         'cancel-save-item-tapped': '_resetItem',
         'view-edit-item-tapped': '_viewEditItem',
-        'view-results-item-tapped': '_viewResultsItem'
+        'view-results-item-tapped': '_viewResultsItem',
+        /* From database element */
+        'create-item-success': '_createItemSuccess',
+        'create-item-error': '_createItemError',
+        'update-item-success': '_updateItemSuccess',
+        'update-item-error': '_updateItemError',
+        'delete-item-success': '_deleteItemSuccess',
+        'delete-item-error': '_deleteItemError',
       },
 
       observers: [
@@ -251,7 +259,7 @@
       },
 
       _voteItem(event) {
-        this.$.db.updateItem(event.detail);
+        this.$.db.updateItem(event.detail, 'Your vote has been registed correctly');
         this.set('routeData.action', 'results');
       },
 
@@ -265,13 +273,54 @@
         this.set('routeData.action', 'view');
       },   
 
-    
       _viewEditItem(event) {
         this.set('routeData.action', 'edit');
       },
 
       _viewResultsItem(event) {
         this.set('routeData.action', 'results');
+      },
+
+      _createItemSuccess() {
+        this.fire('show-message', {
+          "message": "Item created successfully",
+          "type": 'success'
+        });
+      },
+
+      _createItemError() {
+        this.fire('show-message', {
+          "message": "ITEM CREATE ERROR: Unknown error occurred",
+          "type": 'error'
+        });
+      },
+
+      _updateItemSuccess(event) {
+        this.fire('show-message', {
+          "message": event.detail.message || "Item updated successfully",
+          "type": 'success'
+        });
+      },
+
+      _updateItemError() {
+        this.fire('show-message', {
+          "message": "ITEM UPLOAD ERROR: Unknown error occurred",
+          "type": 'error'
+        });
+      },
+
+      _deleteItemSuccess() {
+        this.fire('show-message', {
+          "message": "Item removed successfully",
+          "type": 'success'
+        });
+      },
+
+      _deleteItemError() {
+        this.fire('show-message', {
+          "message": "ITEM DELETE ERROR: Unknown error occurred",
+          "type": 'error'
+        });
       },
 
       _emptyObject(obj) {

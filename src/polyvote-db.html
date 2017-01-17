@@ -109,19 +109,13 @@
         _document.save(_document.path) //second parameter null generates random id
           .then(_ => { 
             // Success Save (add automatically /itemId to path element)
-            this.fire('show-message', {
-              "message": "Item created successfully",
-              "type": 'success'
-            });
+            this.fire('create-item-success');
             this.itemId = _document.path.split('/')[2];
             this.loading = false;
           })
           .catch(_ => { 
             // Failure Save
-            this.fire('show-message', {
-              "message": "ITEM CREATE ERROR: Unknown error occurred",
-              "type": 'error'
-            });
+            this.fire('create-item-error');
             this.loading = false;
           });
       },
@@ -130,26 +124,21 @@
         * Update an item in the database document.
         *
         * @param {Object} Complete item to change.
+        * @param {String} Message in case of success.
         */
-      updateItem(item) {
+      updateItem(item, message) {
         this.loading = true;
         let _document = this.$$('#document'); 
         this.documentData = item;
         _document.save(this.collection, this.itemId)
           .then(_ => { 
             // Success Update
-            this.fire('show-message', {
-              "message": "Item updated successfully",
-              "type": 'success'
-            });            
+            this.fire('update-item-success', { 'message': message });        
             this.loading = false;
           })
           .catch(_ => { 
             // Failure Save
-            this.fire('show-message', {
-              "message": "ITEM UPLOAD ERROR: Unknown error occurred",
-              "type": 'error'
-            });
+            this.fire('update-item-error');
             this.loading = false;
           });
       },
@@ -166,18 +155,12 @@
         _document.save(this.collection, this.itemId)
           .then(_ => { 
             // Success Delete
-            this.fire('show-message', {
-              "message": "Item removed successfully",
-              "type": 'success'
-            });
+            this.fire('delete-item-success');
             this.loading = false;
           })
           .catch(_ => { 
             // Failure Delete
-            this.fire('show-message', {
-              "message": "ITEM DELETE ERROR: Unknown error occurred",
-              "type": 'error'
-            });
+            this.fire('delete-item-error');
             this.loading = false;
           });
       }

@@ -15,7 +15,7 @@
         element.removeAttribute('hidden');
       },
 
-      showFromLeft(element) {
+      showInputFromLeft(element, duration) {
         if (element.hidden) {
           this.show(element);
           element.animate([
@@ -23,7 +23,33 @@
             { transform: 'translateX(0px)' }
           ], {
             easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
-            duration: 200
+            duration: duration * 1000
+          });
+        }
+      },
+
+      showPage(element, duration) {
+        if (element.hidden) {
+          this.show(element);
+          element.animate([
+            { transform: 'translate(600px, 600px)', opacity: 0 }, 
+            { transform: 'translate(0px,0px)', opacity: 1 }
+          ], {
+            easing: 'cubic-bezier(0.19, 1, 0.22, 1)',
+            duration: duration * 1000
+          });
+        }
+      },
+
+      showHighlitedPage(element, duration) {
+        if (element.hidden) {
+          this.show(element);
+          element.animate([
+            { transform: 'translate(-600px, -600px)', opacity: 0 }, 
+            { transform: 'translate(0px,0px)', opacity: 1 }
+          ], {
+            easing: 'cubic-bezier(0.19, 1, 0.22, 1)',
+            duration: duration * 1000
           });
         }
       },
@@ -32,14 +58,14 @@
         element.setAttribute('hidden', '');
       },
 
-      hideToLeft(element, onfinish) {
+      hideInputToLeft(element, duration, onfinish) {
         if (!element.hidden) {
           let animation = element.animate([
             { transform: 'translateX(0px)', opacity: 1 },
             { transform: 'translateX(-600px)', opacity: 0 }
           ], {
             easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
-            duration: 200
+            duration: duration * 1000
           });
           animation.onfinish = _ => {
             this.hide(element);

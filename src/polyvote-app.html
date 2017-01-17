@@ -470,7 +470,7 @@
               <input id="searchInputMenu" class="main__input" type="search" 
                 placeholder="Search" value="{{searchText::input}}" hidden></input>
 
-              <div class="main__menu__title" hidden$="[[searchActive]]">{{menuHeader}}</div>
+              <div class="main__menu__title" id="menuHeader">{{menuHeader}}</div>
 
               <div class="main__menu__tabs">
 
@@ -704,13 +704,6 @@
         '_searchActiveChanged(searchActive, smallScreen, loadComplete)'
       ],
 
-      _ironSelected(event) {
-        console.log("HOLA", event.detail);
-        if (event.detail.item.localName.startstWith('polyvote-')) {
-          console.log("ES UNA VISTA", event.detail);
-        }
-      },
-
       created() {
         // Custom elements polyfill safe way to indicate an element has been upgraded.
         this.removeAttribute('unresolved');
@@ -722,6 +715,27 @@
           this.listen(window, 'online', '_notifyNetworkStatus');
           this.listen(window, 'offline', '_notifyNetworkStatus');
         });
+      },
+
+      /**
+        * Fired when a iron is selected.
+        *
+        * In our case, we use this function to the iron-pages element and it will
+        * animate step from page to another one.
+        */
+      _ironSelected(event) {
+        const element = event.detail.item;
+        const elementName = element.localName;
+        if (elementName.match('^polyvote-')) {
+          // element is a page
+          this.$.animations.hide(element);
+          if (elementName.match('polyvote-new')) {
+            this.$.animations.showHighlitedPage(element, 0.4);
+          }
+          else {
+            this.$.animations.showPage(element, 0.2);
+          }
+        }
       },
 
       _closeDrawer() {
@@ -762,17 +776,18 @@
           // in big screens get search input of menu
           let searchInputActive = smallScreen ? this.$.searchInputToolbar : this.$$('#searchInputMenu');
           let searchInputInactive = smallScreen ? this.$$('#searchInputMenu') : this.$.searchInputToolbar;
+          let activeHeader = smallScreen ? this.$.toolbarHeader : this.$$('#menuHeader');
           if (searchInputInactive) {
             this.$.animations.hide(searchInputInactive);
           }
           if (searchInputActive && searchActive) {
-            if (smallScreen) this.$.animations.showFromLeft(searchInputActive);
-            this.$.animations.hide(this.$.toolbarHeader)
+            this.$.animations.hide(activeHeader);
+            this.$.animations.showInputFromLeft(searchInputActive, 0.2);
             searchInputActive.focus();
           }
           else if (searchInputActive && !searchActive) {
-            this.$.animations.hideToLeft(searchInputActive, _ => {
-              if (smallScreen) this.$.animations.showFromLeft(this.$.toolbarHeader);
+            this.$.animations.hideInputToLeft(searchInputActive, 0.2,  _ => {
+              this.$.animations.showInputFromLeft(activeHeader, 0.2);
             });
             this.searchText = '';
           }
@@ -993,6 +1008,7 @@
         const message = event.detail.message;
         const type = event.detail.type;
         if (infoMessage) {
+          if (infoMessage.opened) infoMessage.close();
           if (type == 'error') infoMessage.className = 'info-message--error';
           else if (type == 'warning') infoMessage.className = 'info-message--warning';
           else if (type == 'success') infoMessage.className = 'info-message--success';

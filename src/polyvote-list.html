@@ -195,7 +195,7 @@
       return this.items
         .filter(item => {
           const _itemTitle = item.title.toUpperCase();
-          const _itemDescription = item.description.toUpperCase();
+          const _itemDescription = item.description ? item.description.toUpperCase() : '';
           return _itemTitle.includes(_searchText) || _itemDescription.includes(_searchText);
         })
         .sort((item1, item2) => {
