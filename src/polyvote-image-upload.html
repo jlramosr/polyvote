@@ -72,7 +72,7 @@
       id="inputFile"
       accept="image/*"
       style="display:none"
-      on-change="_handleFiles" 
+      on-change="_handleFiles"
       tabindex="-1"></input>
     <div class="container image">
         <iron-image
@@ -171,10 +171,12 @@
         * Add url string to image property.
         */
       _handleFiles(event) {
+        console.log("FILE START", event.target.files[0]);
         if (event.target.files) {
           //it has been selected at least one file
           const files = event.target.files;
           const numFiles = event.target.files.length;
+          console.log("FILE IN", files[0]);
           const urlFile = this.$$('#st').uploadFile(files[numFiles-1], 'image', this.maxSize, files[numFiles-1].name);
           this.addEventListener('file-uploaded', event => {
             const urlFile = event.detail.url; 

@@ -2,7 +2,7 @@
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 
-<dom-module id="polyvote-db">
+<dom-module id="polyvote-database">
   <template>
 
     <template is="dom-if" if="[[document]]" id="documentTemplate">
@@ -32,7 +32,7 @@
 
     Polymer({
 
-      is: 'polyvote-db',
+      is: 'polyvote-database',
 
 
       properties: {
@@ -109,8 +109,8 @@
         _document.save(_document.path) //second parameter null generates random id
           .then(_ => { 
             // Success Save (add automatically /itemId to path element)
-            this.fire('create-item-success');
             this.itemId = _document.path.split('/')[2];
+            this.fire('create-item-success', { 'itemId': this.itemId });
             this.loading = false;
           })
           .catch(_ => { 

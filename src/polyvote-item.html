@@ -1,9 +1,9 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
-<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 
-<link rel="import" href="polyvote-db.html">
+<link rel="import" href="polyvote-database.html">
+
 <link rel="import" href="polyvote-item-view.html"/>
 <link rel="import" href="polyvote-item-edit.html"/>
 <link rel="import" href="polyvote-item-results.html"/>
@@ -16,12 +16,6 @@
       :host {
         display: block;
       }
-
-      .item__detail {
-        @apply(--layout-vertical);
-        @apply(--layout-center-center);
-      }
-
     </style>
 
     <app-route
@@ -30,23 +24,9 @@
       data="{{routeData}}"
       tail="{{subroute}}"></app-route>
 
-    <polyvote-db document id="db" collection="elections" document-data="{{item}}" item-id="{{itemId}}" loading="{{loadingDatabase}}"></polyvote-db>
-    <paper-spinner class="spinner" active="[[loadingDatabase]]"></paper-spinner>
+    <polyvote-database document id="db" collection="elections" document-data="{{item}}" item-id="{{itemId}}" loading="{{loadingDatabase}}"></polyvote-database>
 
     <div class$="content--box [[_computeClassContainer(smallScreen)]]">
-
-      <template is="dom-if" if="[[_showItemDetail(action)]]">
-        <div class="item__detail">
-          <iron-image
-            class="image"
-            src="[[item.image]]"
-            sizing="cover"
-            hidden$="[[!item.image]]"></iron-image>
-          <p id="description" class="description">
-            {{item.description}}
-          </p>
-        </div>
-      </template>
 
       <iron-pages
         selected="[[action]]"
@@ -111,7 +91,7 @@
          */
         itemName: {
           type: String,
-          value: 'item'
+          value: 'Item'
         },
 
         /*
@@ -128,7 +108,10 @@
 
         smallScreen: Boolean,
 
-        loadingDatabase: Boolean,
+        loadingDatabase: {
+          type: Boolean,
+          notify: true
+        },
 
         loadComplete: Boolean,
         
@@ -142,12 +125,8 @@
         'view-edit-item-tapped': '_viewEditItem',
         'view-results-item-tapped': '_viewResultsItem',
         /* From database element */
-        'create-item-success': '_createItemSuccess',
-        'create-item-error': '_createItemError',
         'update-item-success': '_updateItemSuccess',
-        'update-item-error': '_updateItemError',
-        'delete-item-success': '_deleteItemSuccess',
-        'delete-item-error': '_deleteItemError',
+        'update-item-error': '_updateItemError'
       },
 
       observers: [
@@ -162,13 +141,8 @@
         this.$$('polyvote-item-edit').saveItem();
       },
 
-      _showItemDetail(action) {
-        return action != 'edit';
-      },
-
       /*
        * Fired when route change (any route)
-       *
        */
       _routeChanged(routeData) {
         if (this.itemId) {
@@ -230,11 +204,11 @@
       },
 
       _itemErrorLoaded() {
-        this.fire('show-error-page', `${this._capitalizeFirstLetter(this.itemName)} not found or time limit exceeded`);
+        this.fire('show-error-page', `${this.itemName} not found or time limit exceeded`);
       },
 
       _actionErrorLoaded() {
-        this.fire('show-error-page', `${this._capitalizeFirstLetter(this.itemName)} action not defined`);
+        this.fire('show-error-page', `${this.itemName} action not defined`);
       },
 
       _actionLoaded() {
@@ -260,12 +234,10 @@
 
       _voteItem(event) {
         this.$.db.updateItem(event.detail, 'Your vote has been registed correctly');
-        this.set('routeData.action', 'results');
       },
 
       _updateItem(event) {
         this.$.db.updateItem(event.detail);
-        this.set('routeData.action', 'view');
       },
           
       _resetItem(event) {
@@ -281,55 +253,31 @@
         this.set('routeData.action', 'results');
       },
 
-      _createItemSuccess() {
-        this.fire('show-message', {
-          "message": "Item created successfully",
-          "type": 'success'
-        });
-      },
-
-      _createItemError() {
-        this.fire('show-message', {
-          "message": "ITEM CREATE ERROR: Unknown error occurred",
-          "type": 'error'
-        });
-      },
-
       _updateItemSuccess(event) {
         this.fire('show-message', {
-          "message": event.detail.message || "Item updated successfully",
-          "type": 'success'
+          'message': event.detail.message || `${this.itemName} updated successfully`,
+          'type': 'success'
         });
+        if (event.detail.message) {
+          // from vote
+          this.set('routeData.action', 'results');
+        }
+        else {
+          // from edit
+          this.set('routeData.action', 'view');
+        }
       },
 
       _updateItemError() {
         this.fire('show-message', {
-          "message": "ITEM UPLOAD ERROR: Unknown error occurred",
-          "type": 'error'
-        });
-      },
-
-      _deleteItemSuccess() {
-        this.fire('show-message', {
-          "message": "Item removed successfully",
-          "type": 'success'
-        });
-      },
-
-      _deleteItemError() {
-        this.fire('show-message', {
-          "message": "ITEM DELETE ERROR: Unknown error occurred",
-          "type": 'error'
+          'message': `${this.itemName} upload error: Unknown error occurred`,
+          'type': 'error'
         });
       },
 
       _emptyObject(obj) {
         return Object.keys(obj).length === 0 && obj.constructor === Object
       },
-
-      _capitalizeFirstLetter(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-      }
 
     });
 

@@ -273,7 +273,7 @@
         </paper-dialog>
 
         <template is="dom-if" if="[[!edit]]">
-          <polyvote-db document id="db" collection="elections" item-id="{{itemId}}" loading="{{loadingDatabase}}"></polyvote-db>
+          <polyvote-database document id="db" collection="elections" item-id="{{itemId}}" loading="{{loadingDatabase}}"></polyvote-database>
         </template>
         
       </template>
@@ -300,9 +300,14 @@
           type: Object
         },
 
-        itemId: {
+        itemId: String,
+
+        /*
+         * The name of the items in singular. 
+         */
+        itemName: {
           type: String,
-          observer: '_itemIdChanged'
+          value: 'Item'
         },
 
         /**
@@ -344,6 +349,11 @@
           computed: '_computeShouldRenderEditButtons(edit, smallScreen)'
         }
 
+      },
+
+      listeners: {
+        'create-item-success': '_createItemSuccess',
+        'create-item-error': '_createItemError'
       },
 
       ready() {
@@ -425,17 +435,31 @@
       },
 
       /**
-        * Fired when it gets itemId by databinding. 
-        * This happens when an item is created or we want to edit one existing.
+        * Fired when the user creation is successfully.
         *
-        * @param {String} Id of the new object created.
+        * It changes the route and let empty all information of this element.
+        *
+        * @param {Object} The event with new itemId attribute on detail ( { detail: { itemId: <new item id> } }).
         */
-      _itemIdChanged(itemId) {
-        if (!this.edit && Boolean(itemId)){
-          this.set('route.path', `/item/${itemId}/`);
-          this.setEmptyFields();
-          this.itemId = null;
-        }
+      _createItemSuccess(event) {
+        const itemId = event.detail.itemId;
+        this.fire('show-message', {
+          'message': `${this.itemName} created successfully`,
+          'type': 'success'
+        });
+        this.set('route.path', `/item/${itemId}/`);
+        this.setEmptyFields();
+        this.itemId = null;
+      },
+
+      /**
+        * Fired when the user creation fails.
+        */
+      _createItemError() {
+        this.fire('show-message', {
+          'message': `${this.itemName} create error: Unknown error occurred`,
+          'type': 'error'
+        });
       },
 
       /**

@@ -1,9 +1,8 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/iron-list/iron-list.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
-<link rel="import" href="polyvote-db.html">
+<link rel="import" href="polyvote-database.html">
 
 <link rel="import" href="shared-styles.html">
 
@@ -86,8 +85,7 @@
 
     </style>
 
-    <polyvote-db id="db" collection="elections" data="{{items}}" loading="{{loadingDb}}"></polyvote-db>    
-    <paper-spinner class="spinner" active="[[loadingDb]]"></paper-spinner>
+    <polyvote-database id="db" collection="elections" data="{{items}}" loading="{{loadingDatabase}}"></polyvote-database>
 
     <div id="content" class="content--list">
 
@@ -153,7 +151,10 @@
 
       smallScreen: Boolean,
 
-      loadingDb: Boolean,
+      loadingDatabase: {
+        type: Boolean,
+        notify: true
+      },
 
       loadComplete: Boolean,
 
@@ -179,6 +180,8 @@
       'view-edit-item-tapped': '_viewEditItem',
       'view-results-item-tapped': '_viewResultsItem',
       'delete-item-tapped': '_viewDeleteItem',
+      'delete-item-success': '_deleteItemSuccess',
+      'delete-item-error': '_deleteItemError',
       'iron-overlay-closed': '_confirmDeleteDialogClosed'
     },
 
@@ -266,10 +269,24 @@
       this.$.db.document = true;
       this.$.db.itemId = itemId;
       this.$.db.deleteItem();
+    },
+
+    _deleteItemSuccess() {
+      this.fire('show-message', {
+        'message': `${this.itemName} removed successfully`,
+        'type': 'success'
+      });
       this.set('route.path', '/list/');
       this.$.db.document = false;
       this.$.db.itemId = null;
-    }
+    },
+
+    _deleteItemError() {
+      this.fire('show-message', {
+        'message': `${this.itemName} delete error: Unknown error occurred`,
+        'type': 'error'
+      });
+    },
 
   });
 

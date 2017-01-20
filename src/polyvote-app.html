@@ -10,6 +10,7 @@
 <link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
 <link rel="import" href="polyvote-animations.html">
 <link rel="import" href="shared-styles.html">
@@ -331,6 +332,8 @@
 
     </style>
 
+    <paper-spinner class="spinner" active="[[loading]]"></paper-spinner>
+
     <polyvote-core database="{{database}}" storage="{{storage}}"></polyvote-core>
     
     <app-location route="{{route}}" path="{{path}}"></app-location>
@@ -557,7 +560,8 @@
 
           <polyvote-list
             name="list"
-            item-name='election'
+            loading-database="{{loading}}"
+            item-name="Election"
             load-complete="{{loadComplete}}"
             route="{{route}}"
             search-text="{{searchText}}"
@@ -567,14 +571,16 @@
           <polyvote-new
             name="new"
             storage="{{storage}}"
+            item-name="Election"
             load-complete="{{loadComplete}}"
             route="{{route}}"
             small-screen="[[smallScreen]]"></polyvote-new>
 
           <polyvote-item
             name="item"
+            loading-database="{{loading}}"
             storage="{{storage}}"
-            item-name='election'
+            item-name="Election"
             item-info="{{itemInfo}}"
             load-complete="{{loadComplete}}"
             old-route="{{route}}"
@@ -677,6 +683,13 @@
           }
         },
 
+        /*
+         * Indicate if there is a page loading.
+         *
+         * It used to show the spinner.
+         */
+        loading: Boolean,
+
         loadComplete: {
           type: Boolean,
           value: false
@@ -730,10 +743,13 @@
           // element is a page
           this.$.animations.hide(element);
           if (elementName.match('polyvote-new')) {
-            this.$.animations.showHighlitedPage(element, 0.4);
+            this.$.animations.showPage(element, 0.2, true, false, false, true); //top,left
+          }
+          else if (elementName.match('^polyvote-item')) {
+            this.$.animations.showPage(element, 0.1, false, false, true, false); //bottom
           }
           else {
-            this.$.animations.showPage(element, 0.2);
+            this.$.animations.showPage(element, 0.1, false, true, true, false); //bottom, right
           }
         }
       },

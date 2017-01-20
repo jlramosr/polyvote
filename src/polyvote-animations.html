@@ -28,24 +28,25 @@
         }
       },
 
-      showPage(element, duration) {
+      /**
+        * Add animate to a element.
+        *
+        * @param {Object} The element to animate.
+        * @param {Number} Duration of the effect.
+        * @param {Boolean} True if show from top (with preference over bottom).
+        * @param {Boolean} True if show from right (with preference over left).
+        * @param {Boolean} True if show from bottom.
+        * @param {Boolean} True if show from left.
+        */
+      showPage(element, duration, top, right, bottom, left) {
+        let x = '0px';
+        let y = '0px';
+        if (top) y = '-600px'; else if (bottom) y = '600px';
+        if (right) x = '600px'; else if (left) x = '-600px'; 
         if (element.hidden) {
           this.show(element);
           element.animate([
-            { transform: 'translate(600px, 600px)', opacity: 0 }, 
-            { transform: 'translate(0px,0px)', opacity: 1 }
-          ], {
-            easing: 'cubic-bezier(0.19, 1, 0.22, 1)',
-            duration: duration * 1000
-          });
-        }
-      },
-
-      showHighlitedPage(element, duration) {
-        if (element.hidden) {
-          this.show(element);
-          element.animate([
-            { transform: 'translate(-600px, -600px)', opacity: 0 }, 
+            { transform: `translate(${x},${y})`, opacity: 0 },
             { transform: 'translate(0px,0px)', opacity: 1 }
           ], {
             easing: 'cubic-bezier(0.19, 1, 0.22, 1)',

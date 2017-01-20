@@ -1,7 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/paper-slider/paper-slider.html">
 
-<link rel="import" href="polyvote-db.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="polyvote-item-results">
@@ -10,6 +9,11 @@
       :host {
         display: block;
         position: relative;
+      }
+
+      .item__detail {
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
       }
 
       .slider__row {
@@ -59,6 +63,17 @@
     </style>
 
     <div id="container" hidden>
+
+      <div class="item__detail">
+        <iron-image
+          class="image"
+          src="[[item.image]]"
+          sizing="cover"
+          hidden$="[[!item.image]]"></iron-image>
+        <p id="description" class="description">
+          {{item.description}}
+        </p>
+      </div>
 
       <template is="dom-repeat" items="[[item.options]]" as="option" 
                 id="optionsTemplate">

@@ -13,6 +13,11 @@
         position: relative;
       }
 
+      .item__detail {
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+      }
+
       .buttons__button {
         border: 1px solid var(--app-primary-color);
         color: var(--app-primary-color);
@@ -46,6 +51,17 @@
     </style>
 
     <div id="container" hidden>
+
+      <div class="item__detail">
+        <iron-image
+          class="image"
+          src="[[item.image]]"
+          sizing="cover"
+          hidden$="[[!item.image]]"></iron-image>
+        <p id="description" class="description">
+          {{item.description}}
+        </p>
+      </div>
 
       <paper-radio-group id="radioGroup" class="radios" selectable="[[_computeSelectable(item.multiple)]]"> 
         <template is="dom-repeat" items="[[item.options]]" as="option" id="optionsTemplate">
