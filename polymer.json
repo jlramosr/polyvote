@@ -1,6 +1,6 @@
 {
   "entrypoint": "index.html",
-  "shell": "src/polyvote.html",
+  "shell": "src/polyvote-app.html",
   "fragments": [
     "src/polyvote-edit.html",
     "src/polyvote-vote.html",
@@ -13,6 +13,6 @@
   ],
   "includeDependencies": [
     "manifest.json",
-    "bower_components/webcomponentsjs/webcomponents-lite.min.js"
+    "bower_components/*"
   ]
 }
